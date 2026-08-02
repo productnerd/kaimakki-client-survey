@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminArchive, adminCreate, adminList, type AdminLink } from "../lib/api";
+import { copyText } from "../lib/clipboard";
 import { ACCOUNT_MANAGERS, VIRTUES } from "../lib/survey";
 import Analytics from "./Analytics";
+import Report from "./Report";
 import ResponseDetail from "./ResponseDetail";
 
 const PASSCODE_KEY = "kaimakki_survey_passcode";
-type Tab = "links" | "responses" | "analytics";
+type Tab = "links" | "responses" | "analytics" | "report";
 
 function surveyUrl(slug: string) {
   return `${window.location.origin}${import.meta.env.BASE_URL}${slug}`;
@@ -108,7 +110,7 @@ export default function Admin() {
           <h1 className="font-display text-2xl font-bold">Client survey</h1>
         </div>
         <nav className="flex gap-1 rounded-full border border-border bg-surface p-1">
-          {(["links", "responses", "analytics"] as Tab[]).map((t) => (
+          {(["links", "responses", "analytics", "report"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -129,6 +131,7 @@ export default function Admin() {
         {tab === "links" && <LinksTab links={links} passcode={passcode} onChange={refresh} />}
         {tab === "responses" && <ResponsesTab links={responded} />}
         {tab === "analytics" && <Analytics links={links} />}
+        {tab === "report" && <Report passcode={passcode} completedCount={responded.length} />}
       </div>
     </div>
   );
@@ -148,9 +151,11 @@ function LinksTab({
     contact_name: "",
     welcome_message: "",
     account_manager: ACCOUNT_MANAGERS[0],
+    reveal_feedback: "",
+    reveal_recommendations: ["", "", ""],
   };
   const [form, setForm] = useState(blank);
-  const [created, setCreated] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -162,7 +167,14 @@ function LinksTab({
     const res = await adminCreate(passcode, form);
     setBusy(false);
     if (!res.ok || !res.slug) return setError(res.error ?? "Could not create the link.");
-    setCreated(res.slug);
+
+    const copied = await copyText(surveyUrl(res.slug));
+    setToast({
+      message: copied
+        ? `Link for ${form.client_name} copied to your clipboard`
+        : `Link for ${form.client_name} created — use Copy link in the list`,
+      ok: copied,
+    });
     setForm(blank);
     onChange();
   }
@@ -171,6 +183,7 @@ function LinksTab({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[22rem_1fr]">
+      {toast && <Toast {...toast} onDone={() => setToast(null)} />}
       <form onSubmit={create} className="card h-fit space-y-4 p-6">
         <h2 className="font-display text-lg font-bold">New link</h2>
         <div>
@@ -218,18 +231,45 @@ function LinksTab({
             placeholder="A line or two of context, in your voice."
           />
         </div>
+        <div>
+          <label className="label" htmlFor="reveal_feedback">
+            Reveal: how the collaboration is going
+          </label>
+          <textarea
+            id="reveal_feedback"
+            rows={4}
+            className="field"
+            value={form.reveal_feedback}
+            onChange={(e) => setForm({ ...form, reveal_feedback: e.target.value })}
+            placeholder="Your honest read on working with them. Unlocked only when they finish."
+          />
+        </div>
+        <div>
+          <span className="label">Reveal: three things we'd do next</span>
+          <div className="space-y-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="font-display text-sm font-bold text-cream-31">{i + 1}</span>
+                <input
+                  className="field"
+                  aria-label={`Recommendation ${i + 1}`}
+                  value={form.reveal_recommendations[i]}
+                  onChange={(e) => {
+                    const next = [...form.reveal_recommendations];
+                    next[i] = e.target.value;
+                    setForm({ ...form, reveal_recommendations: next });
+                  }}
+                  placeholder={i === 0 ? "The biggest lever" : "And…"}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {error && <p className="text-sm text-accent">{error}</p>}
         <button className="btn-primary w-full" disabled={busy}>
           {busy ? "Creating…" : "Create link"}
         </button>
-
-        {created && (
-          <div className="rounded-2xl border border-lime/40 bg-lime/5 p-4">
-            <p className="label mb-1 text-lime">Ready to send</p>
-            <p className="break-all text-xs text-cream-78">{surveyUrl(created)}</p>
-            <CopyButton text={surveyUrl(created)} className="mt-3 w-full" />
-          </div>
-        )}
       </form>
 
       <div>
@@ -345,18 +385,7 @@ function ResponsesTab({ links }: { links: AdminLink[] }) {
               </p>
             </div>
             <Stat label="NPS" value={l.answers?.nps ?? "—"} />
-            <Stat
-              label="PMF"
-              value={
-                l.answers?.pmf === "very"
-                  ? "Very"
-                  : l.answers?.pmf === "somewhat"
-                    ? "Some"
-                    : l.answers?.pmf === "not"
-                      ? "Not"
-                      : "—"
-              }
-            />
+            <Stat label="Disappt." value={l.answers?.pmf ?? "—"} />
             <span className="text-xs text-cream-31">View →</span>
           </button>
         ))}
@@ -377,21 +406,43 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 }
 
 function CopyButton({ text, className = "" }: { text: string; className?: string }) {
-  const [done, setDone] = useState(false);
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle");
   return (
     <button
       className={`rounded-full border border-cream-20 px-3 py-1.5 font-display text-xs font-bold transition hover:border-cream-31 ${
-        done ? "text-lime" : "text-cream-61"
+        state === "done" ? "text-lime" : state === "failed" ? "text-accent" : "text-cream-61"
       } ${className}`}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.stopPropagation();
-        navigator.clipboard.writeText(text);
-        setDone(true);
-        setTimeout(() => setDone(false), 1600);
+        setState((await copyText(text)) ? "done" : "failed");
+        setTimeout(() => setState("idle"), 1800);
       }}
     >
-      {done ? "Copied" : "Copy link"}
+      {state === "done" ? "Copied" : state === "failed" ? "Copy failed" : "Copy link"}
     </button>
+  );
+}
+
+function Toast({ message, ok, onDone }: { message: string; ok: boolean; onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 4000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div
+      role="status"
+      className="fixed inset-x-4 bottom-6 z-50 mx-auto max-w-sm animate-fade-up sm:inset-x-auto sm:right-6"
+    >
+      <div
+        className={`flex items-center gap-3 rounded-full border px-5 py-3 shadow-lg ${
+          ok ? "border-lime/40 bg-lime/10 text-lime" : "border-accent/40 bg-accent/10 text-accent"
+        }`}
+      >
+        <span className="font-display text-sm font-bold">{ok ? "✓" : "!"}</span>
+        <p className="text-sm text-cream">{message}</p>
+      </div>
+    </div>
   );
 }
 
@@ -401,14 +452,15 @@ function downloadCsv(links: AdminLink[]) {
     "contact",
     "account_manager",
     "completed_at",
-    "pmf",
+    "pmf_1_7",
     "pmf_why",
+    "nps",
     "selling_point_1",
     "selling_point_2",
     "selling_point_3",
+    "caveat",
     "main_benefit",
     "improve",
-    "nps",
     ...VIRTUES.map((v) => `virtue_${v.key}`),
     "advice",
     "shines",
@@ -425,12 +477,13 @@ function downloadCsv(links: AdminLink[]) {
       l.completed_at ?? "",
       a.pmf ?? "",
       a.pmf_why ?? "",
+      a.nps ?? "",
       p[0] ?? "",
       p[1] ?? "",
       p[2] ?? "",
+      a.caveat ?? "",
       a.main_benefit ?? "",
       a.improve ?? "",
-      a.nps ?? "",
       ...VIRTUES.map((v) => a.virtues?.[v.key] ?? ""),
       a.am_advice ?? "",
       a.am_shines ?? "",

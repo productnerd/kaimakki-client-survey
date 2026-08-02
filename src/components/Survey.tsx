@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { openSurvey, saveSurvey, type SurveyLink } from "../lib/api";
-import { PMF_OPTIONS, VIRTUES, type Answers } from "../lib/survey";
-import { NpsScale, VirtueScale } from "./Scales";
+import { PMF_MAX, PMF_MIN, VIRTUES, type Answers } from "../lib/survey";
+import { PointScale, VirtueScale } from "./Scales";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
 
@@ -56,10 +56,19 @@ export default function Survey({ slug }: { slug: string }) {
       // A failed autosave shouldn't trap them mid-survey; the next step retries
       // with the full answer set anyway.
     }
-    setSaving(false);
+
     if (complete) {
+      // Re-open to collect the reveal, which the server withholds until now.
+      try {
+        const fresh = await openSurvey(slug);
+        if (fresh) setLink(fresh);
+      } catch {
+        // Non-fatal: they still get the thank-you screen.
+      }
+      setSaving(false);
       setPhase("done");
     } else {
+      setSaving(false);
       setStep(to);
       window.scrollTo({ top: 0 });
     }
@@ -91,6 +100,7 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   if (phase === "done") {
+    const recommendations = (link.reveal_recommendations ?? []).filter((r) => r?.trim());
     return (
       <Centered>
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
@@ -100,12 +110,36 @@ export default function Survey({ slug }: { slug: string }) {
         <p className="mt-4 text-cream-61">
           Genuinely — this is the stuff that changes how we work. Every answer gets read.
         </p>
+
+        {link.reveal_feedback && (
+          <div className="card mt-8 p-6 text-left">
+            <p className="label">Our honest read on working together</p>
+            <p className="whitespace-pre-wrap leading-relaxed text-cream-78">
+              {link.reveal_feedback}
+            </p>
+          </div>
+        )}
+
+        {recommendations.length > 0 && (
+          <div className="card mt-4 p-6 text-left">
+            <p className="label">Three things we'd do next</p>
+            <ol className="space-y-3">
+              {recommendations.map((r, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="font-display font-bold text-accent">{i + 1}</span>
+                  <span className="leading-relaxed text-cream-78">{r}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </Centered>
     );
   }
 
   if (phase === "welcome") {
     const resuming = Object.keys(answers).length > 0;
+    const steps = buildSteps(link, answers, set, setVirtue, setSellingPoint);
     return (
       <Centered>
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
@@ -119,8 +153,8 @@ export default function Survey({ slug }: { slug: string }) {
         )}
         <div className="card mt-8 space-y-4 p-6 text-left">
           <Bullet>
-            <strong className="text-cream">Nine questions</strong>, about five minutes. Most are
-            a tap; a few have a box to type in.
+            <strong className="text-cream">{steps.length} questions</strong>, about five minutes.
+            Most are a tap; a few have a box to type in.
           </Bullet>
           <Bullet>
             We're trying to get better — <strong className="text-cream">as a business and as
@@ -131,11 +165,18 @@ export default function Survey({ slug }: { slug: string }) {
             <strong className="text-cream">{link.account_manager}</strong> specifically. They
             asked for this.
           </Bullet>
+          {link.has_reveal && (
+            <Bullet>
+              Get to the end and you'll <strong className="text-cream">unlock our honest read
+              on how this collaboration is going</strong> — plus the three things we'd do next to
+              take your social up a level.
+            </Bullet>
+          )}
         </div>
         <button
           className="btn-primary mt-8 w-full sm:w-auto"
           onClick={() => {
-            setStep(answers._step ?? 0);
+            setStep(Math.min(answers._step ?? 0, steps.length - 1));
             setPhase("questions");
           }}
         >
@@ -186,18 +227,18 @@ export default function Survey({ slug }: { slug: string }) {
           Back
         </button>
         <button
-          className="btn-primary"
+          className={current.answered || last ? "btn-primary" : "btn-ghost"}
           onClick={() => advance(step + 1, last)}
-          disabled={!current.ready || saving}
+          disabled={saving}
         >
-          {saving ? "Saving…" : last ? "Finish" : "Next"}
+          {saving ? "Saving…" : last ? "Finish" : current.answered ? "Next" : "Skip"}
         </button>
       </div>
     </div>
   );
 }
 
-type Step = { title: string; hint?: string; body: ReactNode; ready: boolean };
+type Step = { title: string; hint?: string; body: ReactNode; answered: boolean };
 
 function buildSteps(
   link: SurveyLink,
@@ -208,27 +249,22 @@ function buildSteps(
 ): Step[] {
   const am = link.account_manager;
   const points = a.selling_points ?? ["", "", ""];
+  const filled = (s?: string) => !!s?.trim();
 
   return [
     {
       title: "How would you feel if you could no longer work with Kaimakki?",
       body: (
-        <div className="space-y-3">
-          {PMF_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => set("pmf", opt.value)}
-              className={`w-full rounded-2xl border px-5 py-4 text-left font-display font-bold transition ${
-                a.pmf === opt.value
-                  ? "border-accent bg-accent text-brown"
-                  : "border-cream-20 text-cream-78 hover:border-cream-31 hover:text-cream"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-          <div className="pt-3">
+        <div className="space-y-7">
+          <PointScale
+            min={PMF_MIN}
+            max={PMF_MAX}
+            value={a.pmf}
+            onChange={(v) => set("pmf", v)}
+            lowLabel="Not disappointed at all"
+            highLabel="Very disappointed"
+          />
+          <div>
             <label className="label" htmlFor="pmf_why">
               Tell us why <span className="normal-case tracking-normal">(optional)</span>
             </label>
@@ -238,16 +274,30 @@ function buildSteps(
               className="field"
               value={a.pmf_why ?? ""}
               onChange={(e) => set("pmf_why", e.target.value)}
-              placeholder="What would you miss most?"
+              placeholder="What would you miss out on?"
             />
           </div>
         </div>
       ),
-      ready: !!a.pmf,
+      answered: typeof a.pmf === "number",
+    },
+    {
+      title: "How likely are you to recommend Kaimakki to another business in your niche?",
+      body: (
+        <PointScale
+          min={0}
+          max={10}
+          value={a.nps}
+          onChange={(v) => set("nps", v)}
+          lowLabel="Not at all likely"
+          highLabel="Extremely likely"
+        />
+      ),
+      answered: typeof a.nps === "number",
     },
     {
       title: "Pitch us to a friend who runs a business.",
-      hint: "What are your top three selling points for Kaimakki? Their words, not ours.",
+      hint: "What are your top three selling points for Kaimakki?",
       body: (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
@@ -255,6 +305,7 @@ function buildSteps(
               <span className="font-display text-sm font-bold text-cream-31">{i + 1}</span>
               <input
                 className="field"
+                aria-label={`Selling point ${i + 1}`}
                 value={points[i] ?? ""}
                 onChange={(e) => setSellingPoint(i, e.target.value)}
                 placeholder={
@@ -265,7 +316,21 @@ function buildSteps(
           ))}
         </div>
       ),
-      ready: points.some((p) => p.trim().length > 0),
+      answered: points.some((p) => filled(p)),
+    },
+    {
+      title: "And the one caveat you'd give them?",
+      hint: "\"Kaimakki are great, but…\" — this tells us who we're not the right fit for, which is just as useful as knowing who we are.",
+      body: (
+        <textarea
+          rows={5}
+          className="field"
+          value={a.caveat ?? ""}
+          onChange={(e) => set("caveat", e.target.value)}
+          placeholder="Who should think twice before hiring us?"
+        />
+      ),
+      answered: filled(a.caveat),
     },
     {
       title: "What's the main benefit you get from Kaimakki?",
@@ -279,11 +344,11 @@ function buildSteps(
           placeholder="The one thing that matters most…"
         />
       ),
-      ready: true,
+      answered: filled(a.main_benefit),
     },
     {
       title: "How can we improve Kaimakki for you?",
-      hint: "Be specific and be blunt. This is the question we act on hardest.",
+      hint: "Please be specific and be blunt. This is the question we act on hardest.",
       body: (
         <textarea
           rows={5}
@@ -293,12 +358,7 @@ function buildSteps(
           placeholder="What's annoying, missing, or slower than it should be?"
         />
       ),
-      ready: true,
-    },
-    {
-      title: "How likely are you to recommend Kaimakki to another business in your niche?",
-      body: <NpsScale value={a.nps} onChange={(v) => set("nps", v)} />,
-      ready: typeof a.nps === "number",
+      answered: filled(a.improve),
     },
     {
       title: `Where does ${am} sit on each of these?`,
@@ -319,11 +379,11 @@ function buildSteps(
           ))}
         </div>
       ),
-      ready: Object.keys(a.virtues ?? {}).length > 0,
+      answered: Object.keys(a.virtues ?? {}).length > 0,
     },
     {
-      title: `What advice would you give ${am}?`,
-      hint: `Specifically: what would make them a 10x social media manager for you — not in general, for you.`,
+      title: `What would make ${am} a 10x social media manager for you?`,
+      hint: "Not in general — for you specifically.",
       body: (
         <textarea
           rows={5}
@@ -333,7 +393,7 @@ function buildSteps(
           placeholder="If they changed one thing about how they work with you…"
         />
       ),
-      ready: true,
+      answered: filled(a.am_advice),
     },
     {
       title: `What do you especially appreciate about ${am}?`,
@@ -347,7 +407,7 @@ function buildSteps(
           placeholder="The thing you'd miss if someone else took over…"
         />
       ),
-      ready: true,
+      answered: filled(a.am_shines),
     },
     {
       title: "Anything else?",
@@ -361,7 +421,7 @@ function buildSteps(
           placeholder="Optional — but we read every one of these."
         />
       ),
-      ready: true,
+      answered: filled(a.anything_else),
     },
   ];
 }

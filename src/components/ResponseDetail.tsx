@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { AdminLink } from "../lib/api";
-import { PMF_OPTIONS, VIRTUES } from "../lib/survey";
+import { PMF_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
 
 export default function ResponseDetail({
   link,
@@ -17,7 +17,6 @@ export default function ResponseDetail({
 
   const a = link.answers ?? {};
   const am = link.account_manager;
-  const pmfLabel = PMF_OPTIONS.find((o) => o.value === a.pmf)?.label;
 
   return (
     <div
@@ -50,9 +49,17 @@ export default function ResponseDetail({
         </div>
 
         <div className="mt-8 space-y-7">
-          <Answer q="If they could no longer work with Kaimakki">
-            <p className="font-display text-lg font-bold text-accent">{pmfLabel ?? "—"}</p>
+          <Answer q="Disappointment if Kaimakki went away">
+            <p className="font-display text-lg font-bold text-accent">
+              {typeof a.pmf === "number" ? `${a.pmf} / ${PMF_MAX}` : "—"}
+            </p>
             {a.pmf_why && <p className="mt-2 whitespace-pre-wrap text-cream-78">{a.pmf_why}</p>}
+          </Answer>
+
+          <Answer q="Would recommend to their niche">
+            <p className="font-display text-lg font-bold text-accent">
+              {typeof a.nps === "number" ? `${a.nps} / 10` : "—"}
+            </p>
           </Answer>
 
           <Answer q="Top three selling points">
@@ -67,18 +74,16 @@ export default function ResponseDetail({
             </ol>
           </Answer>
 
+          <Answer q="The one caveat they'd give a friend">
+            <Text value={a.caveat} />
+          </Answer>
+
           <Answer q="Main benefit">
             <Text value={a.main_benefit} />
           </Answer>
 
           <Answer q="How we can improve">
             <Text value={a.improve} />
-          </Answer>
-
-          <Answer q="Would recommend to their niche">
-            <p className="font-display text-lg font-bold text-accent">
-              {typeof a.nps === "number" ? `${a.nps} / 10` : "—"}
-            </p>
           </Answer>
 
           <Answer q={`${am} — balance across the virtues`}>
@@ -100,7 +105,7 @@ export default function ResponseDetail({
             </div>
           </Answer>
 
-          <Answer q={`Advice for ${am}`}>
+          <Answer q={`What would make ${am} 10x for them`}>
             <Text value={a.am_advice} />
           </Answer>
 
@@ -117,9 +122,9 @@ export default function ResponseDetail({
   );
 }
 
-/** A single -2..2 position drawn as a bar leaving the centre line. */
+/** A single -3..3 position drawn as a bar leaving the centre line. */
 function Diverging({ value }: { value: number }) {
-  const pct = (Math.abs(value) / 2) * 50;
+  const pct = (Math.abs(value) / VIRTUE_EXTENT) * 50;
   return (
     <div className="relative h-2 flex-1 rounded-full bg-cream-10">
       <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-cream-31" />

@@ -1,5 +1,12 @@
 import type { AdminLink } from "../lib/api";
-import { VIRTUES, balanceScore } from "../lib/survey";
+import {
+  PMF_MAX,
+  PMF_MIN,
+  PMF_VERY_FROM,
+  VIRTUE_EXTENT,
+  VIRTUES,
+  balanceScore,
+} from "../lib/survey";
 
 const mean = (ns: number[]) => (ns.length ? ns.reduce((s, n) => s + n, 0) / ns.length : null);
 
@@ -25,9 +32,12 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
     ? Math.round(((promoters - detractors) / npsValues.length) * 100)
     : null;
 
-  // PMF: the Sean Ellis benchmark is 40% "very disappointed".
-  const pmf = done.map((l) => l.answers?.pmf).filter(Boolean);
-  const veryCount = pmf.filter((p) => p === "very").length;
+  // PMF: the Sean Ellis benchmark is 40% "very disappointed" — here, the top two
+  // points of the 1–7 scale.
+  const pmf = done
+    .map((l) => l.answers?.pmf)
+    .filter((n): n is number => typeof n === "number");
+  const veryCount = pmf.filter((p) => p >= PMF_VERY_FROM).length;
   const pmfScore = pmf.length ? Math.round((veryCount / pmf.length) * 100) : null;
 
   const allBalances = done.flatMap((l) =>
@@ -46,9 +56,7 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
           note={
             pmfScore === null
               ? undefined
-              : pmfScore >= 40
-                ? "Above the 40% benchmark"
-                : "Below the 40% benchmark"
+              : `scoring ${PMF_VERY_FROM}–${PMF_MAX} · ${pmfScore >= 40 ? "above" : "below"} the 40% benchmark`
           }
           good={pmfScore !== null && pmfScore >= 40}
         />
@@ -73,86 +81,25 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <Panel title="How they'd feel without us">
-          <div className="flex h-3 overflow-hidden rounded-full bg-cream-10">
-            {(
-              [
-                ["very", "Very disappointed", "bg-lime"],
-                ["somewhat", "Somewhat", "bg-accent"],
-                ["not", "Not disappointed", "bg-cream-31"],
-              ] as const
-            ).map(([key, , cls]) => {
-              const n = pmf.filter((p) => p === key).length;
-              return n ? (
-                <div key={key} className={cls} style={{ width: `${(n / pmf.length) * 100}%` }} />
-              ) : null;
-            })}
-          </div>
-          <div className="mt-4 space-y-2">
-            {(
-              [
-                ["very", "Very disappointed", "bg-lime"],
-                ["somewhat", "Somewhat disappointed", "bg-accent"],
-                ["not", "Not disappointed", "bg-cream-31"],
-              ] as const
-            ).map(([key, label, cls]) => (
-              <div key={key} className="flex items-center gap-2 text-sm">
-                <span className={`h-2.5 w-2.5 rounded-full ${cls}`} />
-                <span className="flex-1 text-cream-61">{label}</span>
-                <span className="font-display font-bold">
-                  {pmf.filter((p) => p === key).length}
-                </span>
-              </div>
-            ))}
-          </div>
+          <Histogram
+            values={pmf}
+            min={PMF_MIN}
+            max={PMF_MAX}
+            barClass={(n) => (n >= PMF_VERY_FROM ? "bg-lime" : n >= 4 ? "bg-cream-31" : "bg-accent")}
+            lowLabel="Not disappointed"
+            highLabel="Very disappointed"
+          />
         </Panel>
 
         <Panel title="Recommendation spread">
-          {(() => {
-            const counts = Array.from({ length: 11 }, (_, n) =>
-              npsValues.filter((v) => v === n).length,
-            );
-            // Bars fill 85% of the track at most, leaving room for the count label.
-            const max = Math.max(1, ...counts);
-            return (
-              <>
-                <div className="flex h-32 items-end gap-1">
-                  {counts.map((count, n) => {
-                    const pct = (count / max) * 85;
-                    return (
-                      <div key={n} className="relative flex h-full flex-1 items-end">
-                        <div
-                          className={`w-full rounded-t ${
-                            n >= 9 ? "bg-lime" : n >= 7 ? "bg-cream-31" : "bg-accent"
-                          }`}
-                          style={{ height: `${pct}%` }}
-                        />
-                        {count > 0 && (
-                          <span
-                            className="absolute inset-x-0 text-center text-[10px] text-cream-61"
-                            style={{ bottom: `calc(${pct}% + 4px)` }}
-                          >
-                            {count}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-1 flex gap-1">
-                  {counts.map((_, n) => (
-                    <span key={n} className="flex-1 text-center text-[10px] text-cream-31">
-                      {n}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-2 flex justify-between text-[11px] text-cream-31">
-                  <span>Detractors</span>
-                  <span>Passives</span>
-                  <span>Promoters</span>
-                </div>
-              </>
-            );
-          })()}
+          <Histogram
+            values={npsValues}
+            min={0}
+            max={10}
+            barClass={(n) => (n >= 9 ? "bg-lime" : n >= 7 ? "bg-cream-31" : "bg-accent")}
+            lowLabel="Detractors"
+            highLabel="Promoters"
+          />
         </Panel>
       </div>
 
@@ -229,6 +176,18 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
           />
         </Panel>
       </div>
+
+      <Panel title="Who we're not right for">
+        <p className="mb-5 text-sm text-cream-61">
+          The caveat each client would give a friend — the clearest signal of which leads to
+          walk away from.
+        </p>
+        <Quotes
+          items={done
+            .filter((l) => l.answers?.caveat?.trim())
+            .map((l) => ({ text: l.answers!.caveat!, who: l.client_name }))}
+        />
+      </Panel>
     </div>
   );
 }
@@ -263,8 +222,8 @@ function VirtueChart({ links }: { links: AdminLink[] }) {
                 <div
                   className="absolute top-0 h-full rounded-full bg-accent"
                   style={{
-                    left: avg < 0 ? `${50 - (Math.abs(avg) / 2) * 50}%` : "50%",
-                    width: `${Math.max((Math.abs(avg) / 2) * 50, 1.5)}%`,
+                    left: avg < 0 ? `${50 - (Math.abs(avg) / VIRTUE_EXTENT) * 50}%` : "50%",
+                    width: `${Math.max((Math.abs(avg) / VIRTUE_EXTENT) * 50, 1.5)}%`,
                   }}
                 />
               )}
@@ -281,6 +240,64 @@ function VirtueChart({ links }: { links: AdminLink[] }) {
         );
       })}
     </div>
+  );
+}
+
+function Histogram({
+  values,
+  min,
+  max,
+  barClass,
+  lowLabel,
+  highLabel,
+}: {
+  values: number[];
+  min: number;
+  max: number;
+  barClass: (n: number) => string;
+  lowLabel: string;
+  highLabel: string;
+}) {
+  const points = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  const counts = points.map((n) => values.filter((v) => v === n).length);
+  // Bars fill 85% of the track at most, leaving room for the count label above.
+  const peak = Math.max(1, ...counts);
+
+  return (
+    <>
+      <div className="flex h-32 items-end gap-1">
+        {points.map((n, i) => {
+          const pct = (counts[i] / peak) * 85;
+          return (
+            <div key={n} className="relative flex h-full flex-1 items-end">
+              <div
+                className={`w-full rounded-t ${barClass(n)}`}
+                style={{ height: `${pct}%` }}
+              />
+              {counts[i] > 0 && (
+                <span
+                  className="absolute inset-x-0 text-center text-[10px] text-cream-61"
+                  style={{ bottom: `calc(${pct}% + 4px)` }}
+                >
+                  {counts[i]}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-1 flex gap-1">
+        {points.map((n) => (
+          <span key={n} className="flex-1 text-center text-[10px] text-cream-31">
+            {n}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 flex justify-between text-[11px] text-cream-31">
+        <span>{lowLabel}</span>
+        <span>{highLabel}</span>
+      </div>
+    </>
   );
 }
 

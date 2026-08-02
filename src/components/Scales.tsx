@@ -1,4 +1,6 @@
-const POSITIONS = [-2, -1, 0, 1, 2];
+import { VIRTUE_EXTENT } from "../lib/survey";
+
+const POSITIONS = Array.from({ length: VIRTUE_EXTENT * 2 + 1 }, (_, i) => i - VIRTUE_EXTENT);
 
 /**
  * Five-point scale where the centre is the good answer (Aristotle's mean).
@@ -60,17 +62,34 @@ export function VirtueScale({
   );
 }
 
-export function NpsScale({
+/** Numbered scale — NPS runs 0–10, the disappointment question runs 1–7. */
+export function PointScale({
+  min,
+  max,
   value,
   onChange,
+  lowLabel,
+  highLabel,
 }: {
+  min: number;
+  max: number;
   value: number | undefined;
   onChange: (v: number) => void;
+  lowLabel: string;
+  highLabel: string;
 }) {
+  const points = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  // 11 points won't fit one phone row; 7 will.
+  const wraps = points.length > 7;
   return (
     <div>
-      <div className="grid grid-cols-6 gap-2 sm:grid-cols-11">
-        {Array.from({ length: 11 }, (_, n) => {
+      <div
+        className={`grid gap-2 ${wraps ? "grid-cols-6 sm:grid-cols-11" : ""}`}
+        style={
+          wraps ? undefined : { gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }
+        }
+      >
+        {points.map((n) => {
           const selected = value === n;
           return (
             <button
@@ -89,9 +108,9 @@ export function NpsScale({
           );
         })}
       </div>
-      <div className="mt-2 flex justify-between text-[11px] text-cream-31">
-        <span>Not at all likely</span>
-        <span>Extremely likely</span>
+      <div className="mt-2 flex justify-between gap-4 text-[11px] text-cream-31">
+        <span>{lowLabel}</span>
+        <span className="text-right">{highLabel}</span>
       </div>
     </div>
   );
