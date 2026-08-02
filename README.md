@@ -1,8 +1,7 @@
 # Kaimakki Client Survey
 
 Personalised feedback surveys for Kaimakki clients. Each client gets their own link
-(`/acme-coffee-roasters_a7b4zu`) with their name, a message from their account manager,
-and a thank-you gift revealed on completion.
+(`/acme-coffee-roasters_a7b4zu`) with their name and a message from their account manager.
 
 **Live:** https://productnerd.github.io/kaimakki-client-survey/
 **Admin:** append `/admin` — passcode-gated.

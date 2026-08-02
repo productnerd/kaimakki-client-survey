@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminArchive, adminCreate, adminList, type AdminLink } from "../lib/api";
-import { VIRTUES } from "../lib/survey";
+import { ACCOUNT_MANAGERS, VIRTUES } from "../lib/survey";
 import Analytics from "./Analytics";
 import ResponseDetail from "./ResponseDetail";
 
@@ -147,8 +147,7 @@ function LinksTab({
     client_name: "",
     contact_name: "",
     welcome_message: "",
-    account_manager: "",
-    gift_note: "",
+    account_manager: ACCOUNT_MANAGERS[0],
   };
   const [form, setForm] = useState(blank);
   const [created, setCreated] = useState<string | null>(null);
@@ -197,14 +196,16 @@ function LinksTab({
         </div>
         <div>
           <label className="label" htmlFor="account_manager">Account manager *</label>
-          <input
+          <select
             id="account_manager"
             className="field"
-            required
             value={form.account_manager}
             onChange={(e) => setForm({ ...form, account_manager: e.target.value })}
-            placeholder="Stefanos"
-          />
+          >
+            {ACCOUNT_MANAGERS.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="label" htmlFor="welcome_message">Welcome message</label>
@@ -215,17 +216,6 @@ function LinksTab({
             value={form.welcome_message}
             onChange={(e) => setForm({ ...form, welcome_message: e.target.value })}
             placeholder="A line or two of context, in your voice."
-          />
-        </div>
-        <div>
-          <label className="label" htmlFor="gift_note">Thank-you gift</label>
-          <textarea
-            id="gift_note"
-            rows={3}
-            className="field"
-            value={form.gift_note}
-            onChange={(e) => setForm({ ...form, gift_note: e.target.value })}
-            placeholder="Shown on the final screen once they finish."
           />
         </div>
         {error && <p className="text-sm text-accent">{error}</p>}

@@ -15,6 +15,8 @@ export type Answers = {
   anything_else?: string;
 };
 
+export const ACCOUNT_MANAGERS = ["Gos", "Maria"];
+
 export const PMF_OPTIONS: { value: PmfChoice; label: string }[] = [
   { value: "very", label: "Very disappointed" },
   { value: "somewhat", label: "Somewhat disappointed" },

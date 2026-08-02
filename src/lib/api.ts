@@ -10,7 +10,6 @@ export type SurveyLink = {
   contact_name: string | null;
   welcome_message: string | null;
   account_manager: string;
-  gift_note: string | null;
   answers: Answers;
   completed: boolean;
 };
@@ -22,7 +21,6 @@ export type AdminLink = {
   contact_name: string | null;
   welcome_message: string | null;
   account_manager: string;
-  gift_note: string | null;
   created_at: string;
   opened_at: string | null;
   archived: boolean;
@@ -65,7 +63,6 @@ export function adminCreate(
     contact_name: string;
     welcome_message: string;
     account_manager: string;
-    gift_note: string;
   },
 ) {
   return rpc<{ ok: boolean; error?: string; slug?: string }>(
@@ -76,7 +73,6 @@ export function adminCreate(
       p_contact_name: fields.contact_name,
       p_welcome_message: fields.welcome_message,
       p_account_manager: fields.account_manager,
-      p_gift_note: fields.gift_note,
     },
   );
 }

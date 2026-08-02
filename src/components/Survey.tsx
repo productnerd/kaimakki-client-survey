@@ -100,12 +100,6 @@ export default function Survey({ slug }: { slug: string }) {
         <p className="mt-4 text-cream-61">
           Genuinely — this is the stuff that changes how we work. Every answer gets read.
         </p>
-        {link.gift_note && (
-          <div className="card mt-8 p-6 text-left">
-            <p className="label">Your thank-you gift</p>
-            <p className="whitespace-pre-wrap text-cream">{link.gift_note}</p>
-          </div>
-        )}
       </Centered>
     );
   }
@@ -136,10 +130,6 @@ export default function Survey({ slug }: { slug: string }) {
             Some questions are about{" "}
             <strong className="text-cream">{link.account_manager}</strong> specifically. They
             asked for this.
-          </Bullet>
-          <Bullet>
-            Finish it and there's a <strong className="text-cream">thank-you gift</strong>{" "}
-            waiting on the last screen.
           </Bullet>
         </div>
         <button
