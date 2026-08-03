@@ -179,8 +179,8 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
 
       <Panel title="Who we're not right for">
         <p className="mb-5 text-sm text-cream-61">
-          The caveat each client would give a friend. The clearest signal of which leads to
-          walk away from.
+          The catch each client would warn a friend about. The clearest signal of which
+          leads to walk away from.
         </p>
         <Quotes
           items={done

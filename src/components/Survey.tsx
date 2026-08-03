@@ -298,7 +298,7 @@ function buildSteps(
       answered: typeof a.pmf === "number",
     },
     {
-      title: "How likely are you to recommend Kaimakki to another business in your niche?",
+      title: "How likely are you to recommend Kaimakki to another business like yours?",
       hint: "Assuming they're not a competitor of yours, of course 😉",
       body: (
         <PointScale
@@ -336,7 +336,7 @@ function buildSteps(
       answered: points.some((p) => filled(p)),
     },
     {
-      title: "And the one caveat you'd give them?",
+      title: "And the one catch you'd warn them about?",
       hint: "\"Kaimakki are great, but…\" 🤔 This tells us who we're not the right fit for, which is just as useful as knowing who we are.",
       body: (
         <textarea

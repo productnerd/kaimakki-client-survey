@@ -56,7 +56,7 @@ export default function ResponseDetail({
             {a.pmf_why && <p className="mt-2 whitespace-pre-wrap text-cream-78">{a.pmf_why}</p>}
           </Answer>
 
-          <Answer q="Would recommend to their niche">
+          <Answer q="Would recommend to a business like theirs">
             <p className="font-display text-lg font-bold text-accent">
               {typeof a.nps === "number" ? `${a.nps} / 10` : "-"}
             </p>
@@ -74,7 +74,7 @@ export default function ResponseDetail({
             </ol>
           </Answer>
 
-          <Answer q="The one caveat they'd give a friend">
+          <Answer q="The one catch they'd warn a friend about">
             <Text value={a.caveat} />
           </Answer>
 

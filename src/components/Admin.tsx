@@ -458,7 +458,7 @@ function downloadCsv(links: AdminLink[]) {
     "selling_point_1",
     "selling_point_2",
     "selling_point_3",
-    "caveat",
+    "catch",
     "main_benefit",
     "improve",
     ...VIRTUES.map((v) => `virtue_${v.key}`),

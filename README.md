@@ -9,7 +9,7 @@ Personalised feedback surveys for Kaimakki clients. Each client gets their own l
 ## The survey
 
 Ten questions: how disappointed they'd be without us (1–7), NPS, three selling points,
-the one caveat they'd give a friend, main benefit, what to improve, a ten-dimension read
+the one catch they'd warn a friend about, main benefit, what to improve, a ten-dimension read
 on the account manager, what would make that person 10x for them, where they shine, and
 an open box. Every question is skippable: the button reads *Skip* until they answer.
 
