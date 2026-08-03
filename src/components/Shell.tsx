@@ -47,16 +47,18 @@ export function Shell({
 
       {onToggleMusic && <MusicButton on={!!musicOn} onClick={onToggleMusic} />}
 
-      <div className="relative flex min-h-full flex-col items-center justify-center gap-6 p-4 py-8 sm:gap-8 sm:p-6">
-        {/* The wordmark is cream, and the loop's sky is near white at its
-            brightest, so it needs its own backing to stay legible. */}
-        <div className="glass shrink-0 rounded-full px-6 py-3">
-          <img
-            src={asset("kaimakki-logo.png")}
-            alt="Kaimakki Studio"
-            className="h-8 w-auto sm:h-9"
-          />
-        </div>
+      {/* The logo sits out of flow so the panel centres on the viewport rather
+          than on the pair of them. Padding reserves its space. */}
+      {/* Viewport units, not min-h-full: a percentage min-height resolves
+          against this box's auto-height parent and collapses to the content,
+          which left the panel sitting high. dvh keeps it right on mobile,
+          where the browser chrome comes and goes. */}
+      <div className="relative flex min-h-screen min-h-dvh items-center justify-center px-4 py-28 sm:px-6 sm:py-32">
+        <img
+          src={asset("kaimakki-logo.png")}
+          alt="Kaimakki Studio"
+          className="absolute left-1/2 top-7 h-9 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-8 sm:h-11"
+        />
         <div className="glass w-full max-w-2xl p-6 sm:p-10">{children}</div>
       </div>
     </div>

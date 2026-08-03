@@ -111,14 +111,14 @@ export default function Survey({ slug }: { slug: string }) {
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
         </p>
-        <h1 className="q-title mt-3">Thank you, {link.contact_name || link.client_name}.</h1>
+        <h1 className="q-title mt-3">Thank you, {link.contact_name || link.client_name} 🙌</h1>
         <p className="mt-4 text-cream-61">
           Genuinely, this is the stuff that changes how we work. Every answer gets read.
         </p>
 
         {link.reveal_feedback && (
           <div className="mt-8 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
-            <p className="label">Our honest read on working together</p>
+            <p className="label">💬 Our honest read on working together</p>
             <p className="whitespace-pre-wrap leading-relaxed text-cream-78">
               {link.reveal_feedback}
             </p>
@@ -127,7 +127,7 @@ export default function Survey({ slug }: { slug: string }) {
 
         {recommendations.length > 0 && (
           <div className="mt-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
-            <p className="label">Three things we'd do next</p>
+            <p className="label">🚀 Three things we'd do next</p>
             <ol className="space-y-3">
               {recommendations.map((r, i) => (
                 <li key={i} className="flex gap-3">
@@ -152,30 +152,30 @@ export default function Survey({ slug }: { slug: string }) {
           Hi {link.contact_name || link.client_name}, got five minutes?
         </h1>
         <p className="mt-5 text-lg text-cream-78">
-          It's August. You're hopefully horizontal somewhere with a cold drink within reach.
-          Perfect. This is the sort of thing that goes down much easier from a sunbed than
-          from your desk.
+          It's August ☀️ You're hopefully horizontal somewhere with a cold drink within
+          reach. Perfect. This is the sort of thing that goes down much easier from a sunbed
+          than from your desk.
         </p>
         {link.welcome_message && (
           <p className="mt-4 whitespace-pre-wrap text-lg text-cream-78">{link.welcome_message}</p>
         )}
         <div className="mt-8 space-y-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
           <Bullet>
-            <strong className="text-cream">{steps.length} questions</strong>, about five minutes.
-            Most are a tap; a few have a box to type in.
+            ⏱️ <strong className="text-cream">{steps.length} questions</strong>, about five
+            minutes. Most are a tap; a few have a box to type in.
           </Bullet>
           <Bullet>
-            We're trying to get better as a{" "}
+            🎯 We're trying to get better as a{" "}
             <strong className="text-cream">business and as people</strong>. Blunt answers are
             worth more to us than kind ones.
           </Bullet>
           <Bullet>
-            Some questions are about{" "}
+            👋 Some questions are about{" "}
             <strong className="text-cream">{link.account_manager}</strong> specifically.
           </Bullet>
           {link.has_reveal && (
             <Bullet>
-              Get to the end and you'll unlock{" "}
+              🔓 Get to the end and you'll unlock{" "}
               <strong className="text-cream">the three things we'd do next to take your social,
               and this collaboration, to the next level</strong>.
             </Bullet>
@@ -295,7 +295,7 @@ function buildSteps(
     },
     {
       title: "How likely are you to recommend Kaimakki to another business in your niche?",
-      hint: "Assuming they're not a competitor of yours, of course ;)",
+      hint: "Assuming they're not a competitor of yours, of course 😉",
       body: (
         <PointScale
           min={0}
@@ -333,7 +333,7 @@ function buildSteps(
     },
     {
       title: "And the one caveat you'd give them?",
-      hint: "\"Kaimakki are great, but…\" This tells us who we're not the right fit for, which is just as useful as knowing who we are.",
+      hint: "\"Kaimakki are great, but…\" 🤔 This tells us who we're not the right fit for, which is just as useful as knowing who we are.",
       body: (
         <textarea
           rows={5}
@@ -361,7 +361,7 @@ function buildSteps(
     },
     {
       title: "How can we improve Kaimakki for you?",
-      hint: "If we don't know what is not working, we cannot get better. So please be specific and be blunt. The more the better.",
+      hint: "If we don't know what is not working, we cannot get better 🛠️ So please be specific and be blunt. The more the better.",
       body: (
         <textarea
           rows={5}
@@ -375,7 +375,7 @@ function buildSteps(
     },
     {
       title: `Where does ${am} sit on each of these?`,
-      hint: "Borrowed from Aristotle: every strength is a middle point between two extremes. The centre is the good answer. The ends are both ways of overdoing it.",
+      hint: "Borrowed from Aristotle 🏛️ every strength is a middle point between two extremes. The centre is the good answer. The ends are both ways of overdoing it.",
       body: (
         <div className="space-y-7">
           {VIRTUES.map((v) => (
@@ -410,7 +410,7 @@ function buildSteps(
     },
     {
       title: `What do you especially appreciate about ${am}?`,
-      hint: "Where do they shine? We'd love to be able to tell them.",
+      hint: "Where do they shine? ✨ We'd love to be able to tell them.",
       body: (
         <textarea
           rows={5}
@@ -424,7 +424,7 @@ function buildSteps(
     },
     {
       title: "Anything else?",
-      hint: "The floor is yours. Anything we didn't ask about.",
+      hint: "The floor is yours 🎤 Anything we didn't ask about.",
       body: (
         <textarea
           rows={6}
