@@ -33,6 +33,12 @@ body,
   height: 100%;
 }
 
+/* Everything in the UI is sized in rem, so dropping the root size scales the
+   whole thing down together: type, padding, gaps and radii stay in proportion. */
+html {
+  font-size: 15px;
+}
+
 body {
   margin: 0;
   background: #121212;
@@ -74,18 +80,18 @@ body {
   }
 
   .q-title {
-    @apply font-display text-2xl font-black leading-tight text-cream sm:text-[2rem];
+    @apply font-display text-xl font-black leading-tight text-cream sm:text-[1.7rem];
   }
 
   .field {
-    @apply w-full rounded-2xl border border-cream-20 bg-background/40 px-4 py-3 text-cream
+    @apply w-full rounded-xl border border-cream-20 bg-background/40 px-3.5 py-2.5 text-sm text-cream
            backdrop-blur-sm placeholder:text-cream-31 focus:border-accent
            focus:outline-none focus:ring-2 focus:ring-accent/30;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
-           font-display text-sm font-bold uppercase tracking-wider transition
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
+           font-display text-xs font-bold uppercase tracking-wider transition
            disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-primary {
@@ -96,6 +102,6 @@ body {
   }
 
   .label {
-    @apply mb-2 block font-display text-xs font-bold uppercase tracking-wider text-cream-61;
+    @apply mb-1.5 block font-display text-[10px] font-bold uppercase tracking-wider text-cream-61;
   }
 }

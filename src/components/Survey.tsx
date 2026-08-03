@@ -111,13 +111,13 @@ export default function Survey({ slug }: { slug: string }) {
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
         </p>
-        <h1 className="q-title mt-3">Thank you, {link.contact_name || link.client_name} 🙌</h1>
+        <h1 className="q-title mt-2">Thank you, {link.contact_name || link.client_name} 🙌</h1>
         <p className="mt-4 text-cream-61">
           Genuinely, this is the stuff that changes how we work. Every answer gets read.
         </p>
 
         {link.reveal_feedback && (
-          <div className="mt-8 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
+          <div className="mt-6 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
             <p className="label">💬 Our honest read on working together</p>
             <p className="whitespace-pre-wrap leading-relaxed text-cream-78">
               {link.reveal_feedback}
@@ -126,7 +126,7 @@ export default function Survey({ slug }: { slug: string }) {
         )}
 
         {recommendations.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
+          <div className="mt-3 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
             <p className="label">🚀 Three things we'd do next</p>
             <ol className="space-y-3">
               {recommendations.map((r, i) => (
@@ -151,37 +151,41 @@ export default function Survey({ slug }: { slug: string }) {
         <h1 className="q-title">
           Hi {link.contact_name || link.client_name}, got five minutes?
         </h1>
-        <p className="mt-5 text-lg text-cream-78">
-          It's August ☀️ You're hopefully horizontal somewhere with a cold drink within
-          reach. Perfect. This is the sort of thing that goes down much easier from a sunbed
-          than from your desk.
+        <p className="mt-4 text-cream-78">
+          It's August ☀️ You're hopefully horizontal somewhere with a cold brew or bubbly 🥂
+          in hand.
+        </p>
+        <p className="mt-3 text-cream-78">
+          We have been at this together for a while now, so we would like to know how we can
+          be better for you and as professionals.
         </p>
         {link.welcome_message && (
-          <p className="mt-4 whitespace-pre-wrap text-lg text-cream-78">{link.welcome_message}</p>
+          <p className="mt-3 whitespace-pre-wrap text-cream-78">{link.welcome_message}</p>
         )}
-        <div className="mt-8 space-y-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
+        <div className="mt-6 space-y-3 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
           <Bullet>
-            ⏱️ <strong className="text-cream">{steps.length} questions</strong>, about five
+            <strong className="text-cream">{steps.length} questions</strong>, about five
             minutes. Most are a tap; a few have a box to type in.
           </Bullet>
           <Bullet>
-            🎯 We're trying to get better as a{" "}
+            We're trying to get better as a{" "}
             <strong className="text-cream">business and as people</strong>. Blunt answers are
             worth more to us than kind ones.
           </Bullet>
           <Bullet>
-            👋 Some questions are about{" "}
+            Some questions are about{" "}
             <strong className="text-cream">{link.account_manager}</strong> specifically.
+            Everything you share stays between us. I will share it with them personally.
           </Bullet>
           {link.has_reveal && (
             <Bullet>
-              🔓 Get to the end and you'll unlock{" "}
+              Get to the end and you'll unlock{" "}
               <strong className="text-cream">the three things we'd do next to take your social,
               and this collaboration, to the next level</strong>.
             </Bullet>
           )}
         </div>
-        <div className="mt-8 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <button
             className="btn-primary w-full sm:w-auto"
             onClick={() => {
@@ -220,10 +224,10 @@ export default function Survey({ slug }: { slug: string }) {
       <div key={step} className="flex-1 animate-fade-up">
         <h2 className="q-title">{current.title}</h2>
         {current.hint && <p className="mt-3 text-cream-61">{current.hint}</p>}
-        <div className="mt-7">{current.body}</div>
+        <div className="mt-6">{current.body}</div>
       </div>
 
-      <div className="mt-10 flex items-center justify-between gap-3">
+      <div className="mt-8 flex items-center justify-between gap-3">
         <button
           className="btn-ghost"
           onClick={() => {

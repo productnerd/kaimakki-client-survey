@@ -53,13 +53,13 @@ export function Shell({
           against this box's auto-height parent and collapses to the content,
           which left the panel sitting high. dvh keeps it right on mobile,
           where the browser chrome comes and goes. */}
-      <div className="relative flex min-h-screen min-h-dvh items-center justify-center px-4 py-28 sm:px-6 sm:py-32">
+      <div className="relative flex min-h-screen min-h-dvh items-center justify-center px-4 py-24 sm:px-6 sm:py-28">
         <img
           src={asset("kaimakki-logo.png")}
           alt="Kaimakki Studio"
-          className="absolute left-1/2 top-7 h-9 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-8 sm:h-11"
+          className="absolute left-1/2 top-6 h-8 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-7 sm:h-9"
         />
-        <div className="glass w-full max-w-2xl p-6 sm:p-10">{children}</div>
+        <div className="glass w-full max-w-xl p-5 sm:p-8">{children}</div>
       </div>
     </div>
   );
@@ -71,7 +71,7 @@ function MusicButton({ on, onClick }: { on: boolean; onClick: () => void }) {
       onClick={onClick}
       aria-label={on ? "Mute the music" : "Unmute the music"}
       aria-pressed={on}
-      className={`fixed right-4 top-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-md transition sm:right-6 sm:top-6 ${
+      className={`fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md transition sm:right-6 sm:top-6 ${
         on
           ? "border-cream-20 bg-background/50 text-cream"
           : "border-cream-20 bg-background/50 text-cream-31"
@@ -79,7 +79,7 @@ function MusicButton({ on, onClick }: { on: boolean; onClick: () => void }) {
     >
       <svg
         viewBox="0 0 24 24"
-        className="h-5 w-5"
+        className="h-4 w-4"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.75"
@@ -105,7 +105,7 @@ function MusicButton({ on, onClick }: { on: boolean; onClick: () => void }) {
 }
 
 const FADE_IN_MS = 5000;
-const VOLUME = 0.28;
+const VOLUME = 0.21;
 const STORAGE_KEY = "kaimakki_survey_music";
 
 /**
