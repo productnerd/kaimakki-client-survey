@@ -2,7 +2,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { openSurvey, saveSurvey, type SurveyLink } from "../lib/api";
 import { PMF_MAX, PMF_MIN, VIRTUES, type Answers } from "../lib/survey";
 import { PointScale, VirtueScale } from "./Scales";
-import { Logo, Shell, useMusic } from "./Shell";
+import { Shell, useMusic } from "./Shell";
+import Confetti from "./Confetti";
+import { play } from "../lib/sfx";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
 
@@ -13,13 +15,6 @@ export default function Survey({ slug }: { slug: string }) {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const music = useMusic();
-  const [musicOn, setMusicOn] = useState(false);
-
-  const toggleMusic = () => {
-    music.toggle();
-    // The fade means the element's state settles a tick later.
-    setTimeout(() => setMusicOn(music.isOn()), 60);
-  };
 
   useEffect(() => {
     let live = true;
@@ -90,8 +85,7 @@ export default function Survey({ slug }: { slug: string }) {
   if (phase === "notfound") {
     return (
       <Shell>
-        <Logo />
-        <h1 className="q-title mt-6">We can't find that link.</h1>
+        <h1 className="q-title">We can't find that link.</h1>
         <p className="mt-4 text-cream-61">
           It may have expired or been mistyped. Send your account manager a nudge and
           they'll fire over a fresh one.
@@ -103,8 +97,7 @@ export default function Survey({ slug }: { slug: string }) {
   if (phase === "error" || !link) {
     return (
       <Shell>
-        <Logo />
-        <h1 className="q-title mt-6">Something went wrong.</h1>
+        <h1 className="q-title">Something went wrong.</h1>
         <p className="mt-4 text-cream-61">Give it a refresh. If it keeps happening, let us know.</p>
       </Shell>
     );
@@ -113,9 +106,9 @@ export default function Survey({ slug }: { slug: string }) {
   if (phase === "done") {
     const recommendations = (link.reveal_recommendations ?? []).filter((r) => r?.trim());
     return (
-      <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
-        <Logo />
-        <p className="mt-6 font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
+      <Shell musicOn={music.on} onToggleMusic={music.toggle}>
+        <Confetti />
+        <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
         </p>
         <h1 className="q-title mt-3">Thank you, {link.contact_name || link.client_name}.</h1>
@@ -153,10 +146,9 @@ export default function Survey({ slug }: { slug: string }) {
     const resuming = Object.keys(answers).length > 0;
     const steps = buildSteps(link, answers, set, setVirtue, setSellingPoint);
     return (
-      <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
+      <Shell musicOn={music.on} onToggleMusic={music.toggle}>
         <div className="animate-fade-up">
-        <Logo />
-        <h1 className="q-title mt-6">
+        <h1 className="q-title">
           Hi {link.contact_name || link.client_name}, got five minutes?
         </h1>
         <p className="mt-5 text-lg text-cream-78">
@@ -193,8 +185,7 @@ export default function Survey({ slug }: { slug: string }) {
           <button
             className="btn-primary w-full sm:w-auto"
             onClick={() => {
-              music.start();
-              setTimeout(() => setMusicOn(music.isOn()), 60);
+              play("next");
               setStep(Math.min(answers._step ?? 0, steps.length - 1));
               setPhase("questions");
             }}
@@ -212,18 +203,16 @@ export default function Survey({ slug }: { slug: string }) {
   const last = step === steps.length - 1;
 
   return (
-    <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
+    <Shell musicOn={music.on} onToggleMusic={music.toggle}>
       <div className="mb-8">
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <Logo className="h-7" />
-          <span className="text-xs text-cream-31">
-            {step + 1} of {steps.length}
-          </span>
-        </div>
+        <p className="mb-2 text-center text-xs text-cream-31">
+          {step + 1} of {steps.length}
+        </p>
         <div className="h-1 w-full overflow-hidden rounded-full bg-cream-10">
+          {/* Empty on the first question: progress is what you have finished. */}
           <div
             className="h-full rounded-full bg-accent transition-all duration-500"
-            style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+            style={{ width: `${(step / steps.length) * 100}%` }}
           />
         </div>
       </div>
@@ -234,10 +223,11 @@ export default function Survey({ slug }: { slug: string }) {
         <div className="mt-7">{current.body}</div>
       </div>
 
-      <div className="mt-10 flex items-center justify-end gap-3 pb-4">
+      <div className="mt-10 flex items-center justify-between gap-3">
         <button
           className="btn-ghost"
           onClick={() => {
+            play("back");
             setStep((s) => Math.max(0, s - 1));
             window.scrollTo({ top: 0 });
           }}
@@ -247,7 +237,10 @@ export default function Survey({ slug }: { slug: string }) {
         </button>
         <button
           className={current.answered || last ? "btn-primary" : "btn-ghost"}
-          onClick={() => advance(step + 1, last)}
+          onClick={() => {
+            play("next");
+            advance(step + 1, last);
+          }}
           disabled={saving}
         >
           {saving ? "Saving…" : last ? "Finish" : current.answered ? "Next" : "Skip"}
@@ -279,7 +272,7 @@ function buildSteps(
             min={PMF_MIN}
             max={PMF_MAX}
             value={a.pmf}
-            onChange={(v) => set("pmf", v)}
+            onChange={(v) => { play("select"); set("pmf", v); }}
             lowLabel="Not disappointed at all"
             highLabel="Very disappointed"
           />
@@ -308,7 +301,7 @@ function buildSteps(
           min={0}
           max={10}
           value={a.nps}
-          onChange={(v) => set("nps", v)}
+          onChange={(v) => { play("select"); set("nps", v); }}
           lowLabel="Not at all likely"
           highLabel="Extremely likely"
         />
@@ -393,7 +386,7 @@ function buildSteps(
                 mid={v.mid}
                 high={v.high}
                 value={a.virtues?.[v.key]}
-                onChange={(pos) => setVirtue(v.key, pos)}
+                onChange={(pos) => { play("select"); setVirtue(v.key, pos); }}
               />
             </div>
           ))}

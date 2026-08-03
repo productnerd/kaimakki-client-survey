@@ -64,10 +64,13 @@ body {
     @apply rounded-brand border border-border bg-surface;
   }
 
-  /* Frosted panel the survey floats in, over the video. */
+  /* Frosted panel the survey floats in. There is no scrim over the video, so
+     this carries all of the text contrast on its own: dark enough to read
+     against the loop's brightest frames, still translucent enough to see
+     through. */
   .glass {
-    @apply rounded-brand border border-cream-20 bg-cream/[0.07] shadow-2xl
-           shadow-black/40 backdrop-blur-2xl;
+    @apply rounded-brand border border-cream-20 bg-background/60 shadow-2xl
+           shadow-black/50 backdrop-blur-xl;
   }
 
   .q-title {
