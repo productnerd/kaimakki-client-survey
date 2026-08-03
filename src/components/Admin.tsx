@@ -172,7 +172,7 @@ function LinksTab({
     setToast({
       message: copied
         ? `Link for ${form.client_name} copied to your clipboard`
-        : `Link for ${form.client_name} created — use Copy link in the list`,
+        : `Link for ${form.client_name} created. Use Copy link in the list`,
       ok: copied,
     });
     setForm(blank);
@@ -384,8 +384,8 @@ function ResponsesTab({ links }: { links: AdminLink[] }) {
                 })}
               </p>
             </div>
-            <Stat label="NPS" value={l.answers?.nps ?? "—"} />
-            <Stat label="Disappt." value={l.answers?.pmf ?? "—"} />
+            <Stat label="NPS" value={l.answers?.nps ?? "-"} />
+            <Stat label="Disappt." value={l.answers?.pmf ?? "-"} />
             <span className="text-xs text-cream-31">View →</span>
           </button>
         ))}

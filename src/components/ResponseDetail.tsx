@@ -51,14 +51,14 @@ export default function ResponseDetail({
         <div className="mt-8 space-y-7">
           <Answer q="Disappointment if Kaimakki went away">
             <p className="font-display text-lg font-bold text-accent">
-              {typeof a.pmf === "number" ? `${a.pmf} / ${PMF_MAX}` : "—"}
+              {typeof a.pmf === "number" ? `${a.pmf} / ${PMF_MAX}` : "-"}
             </p>
             {a.pmf_why && <p className="mt-2 whitespace-pre-wrap text-cream-78">{a.pmf_why}</p>}
           </Answer>
 
           <Answer q="Would recommend to their niche">
             <p className="font-display text-lg font-bold text-accent">
-              {typeof a.nps === "number" ? `${a.nps} / 10` : "—"}
+              {typeof a.nps === "number" ? `${a.nps} / 10` : "-"}
             </p>
           </Answer>
 
@@ -86,7 +86,7 @@ export default function ResponseDetail({
             <Text value={a.improve} />
           </Answer>
 
-          <Answer q={`${am} — balance across the virtues`}>
+          <Answer q={`${am}: balance across the virtues`}>
             <div className="space-y-2">
               {VIRTUES.map((v) => {
                 const pos = a.virtues?.[v.key];

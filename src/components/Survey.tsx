@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { openSurvey, saveSurvey, type SurveyLink } from "../lib/api";
 import { PMF_MAX, PMF_MIN, VIRTUES, type Answers } from "../lib/survey";
 import { PointScale, VirtueScale } from "./Scales";
+import { Logo, Shell, useMusic } from "./Shell";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
 
@@ -11,6 +12,14 @@ export default function Survey({ slug }: { slug: string }) {
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const music = useMusic();
+  const [musicOn, setMusicOn] = useState(false);
+
+  const toggleMusic = () => {
+    music.toggle();
+    // The fade means the element's state settles a tick later.
+    setTimeout(() => setMusicOn(music.isOn()), 60);
+  };
 
   useEffect(() => {
     let live = true;
@@ -75,44 +84,47 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   if (phase === "loading") {
-    return <Centered><p className="animate-breathe text-cream-31">Loading…</p></Centered>;
+    return <Shell><p className="animate-breathe text-center text-cream-31">Loading…</p></Shell>;
   }
 
   if (phase === "notfound") {
     return (
-      <Centered>
-        <h1 className="q-title">We can't find that link.</h1>
+      <Shell>
+        <Logo />
+        <h1 className="q-title mt-6">We can't find that link.</h1>
         <p className="mt-4 text-cream-61">
           It may have expired or been mistyped. Send your account manager a nudge and
           they'll fire over a fresh one.
         </p>
-      </Centered>
+      </Shell>
     );
   }
 
   if (phase === "error" || !link) {
     return (
-      <Centered>
-        <h1 className="q-title">Something went wrong.</h1>
-        <p className="mt-4 text-cream-61">Give it a refresh — if it keeps happening, let us know.</p>
-      </Centered>
+      <Shell>
+        <Logo />
+        <h1 className="q-title mt-6">Something went wrong.</h1>
+        <p className="mt-4 text-cream-61">Give it a refresh. If it keeps happening, let us know.</p>
+      </Shell>
     );
   }
 
   if (phase === "done") {
     const recommendations = (link.reveal_recommendations ?? []).filter((r) => r?.trim());
     return (
-      <Centered>
-        <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
+      <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
+        <Logo />
+        <p className="mt-6 font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
         </p>
-        <h1 className="q-title mt-4">Thank you, {link.contact_name || link.client_name}.</h1>
+        <h1 className="q-title mt-3">Thank you, {link.contact_name || link.client_name}.</h1>
         <p className="mt-4 text-cream-61">
-          Genuinely — this is the stuff that changes how we work. Every answer gets read.
+          Genuinely, this is the stuff that changes how we work. Every answer gets read.
         </p>
 
         {link.reveal_feedback && (
-          <div className="card mt-8 p-6 text-left">
+          <div className="mt-8 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
             <p className="label">Our honest read on working together</p>
             <p className="whitespace-pre-wrap leading-relaxed text-cream-78">
               {link.reveal_feedback}
@@ -121,7 +133,7 @@ export default function Survey({ slug }: { slug: string }) {
         )}
 
         {recommendations.length > 0 && (
-          <div className="card mt-4 p-6 text-left">
+          <div className="mt-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
             <p className="label">Three things we'd do next</p>
             <ol className="space-y-3">
               {recommendations.map((r, i) => (
@@ -133,7 +145,7 @@ export default function Survey({ slug }: { slug: string }) {
             </ol>
           </div>
         )}
-      </Centered>
+      </Shell>
     );
   }
 
@@ -141,48 +153,57 @@ export default function Survey({ slug }: { slug: string }) {
     const resuming = Object.keys(answers).length > 0;
     const steps = buildSteps(link, answers, set, setVirtue, setSellingPoint);
     return (
-      <Centered>
-        <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          Kaimakki
-        </p>
-        <h1 className="q-title mt-4">
-          Hi {link.contact_name || link.client_name} — got five minutes?
+      <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
+        <div className="animate-fade-up">
+        <Logo />
+        <h1 className="q-title mt-6">
+          Hi {link.contact_name || link.client_name}, got five minutes?
         </h1>
+        <p className="mt-5 text-lg text-cream-78">
+          It's August. You're hopefully horizontal somewhere with a cold drink within reach.
+          Perfect. This is the sort of thing that goes down much easier from a sunbed than
+          from your desk.
+        </p>
         {link.welcome_message && (
-          <p className="mt-5 whitespace-pre-wrap text-lg text-cream-78">{link.welcome_message}</p>
+          <p className="mt-4 whitespace-pre-wrap text-lg text-cream-78">{link.welcome_message}</p>
         )}
-        <div className="card mt-8 space-y-4 p-6 text-left">
+        <div className="mt-8 space-y-4 rounded-2xl border border-cream-20 bg-background/30 p-6 text-left">
           <Bullet>
             <strong className="text-cream">{steps.length} questions</strong>, about five minutes.
             Most are a tap; a few have a box to type in.
           </Bullet>
           <Bullet>
-            We're trying to get better — <strong className="text-cream">as a business and as
-            people</strong>. Blunt answers are worth more to us than kind ones.
+            We're trying to get better as a{" "}
+            <strong className="text-cream">business and as people</strong>. Blunt answers are
+            worth more to us than kind ones.
           </Bullet>
           <Bullet>
             Some questions are about{" "}
-            <strong className="text-cream">{link.account_manager}</strong> specifically. They
-            asked for this.
+            <strong className="text-cream">{link.account_manager}</strong> specifically.
           </Bullet>
           {link.has_reveal && (
             <Bullet>
-              Get to the end and you'll <strong className="text-cream">unlock our honest read
-              on how this collaboration is going</strong> — plus the three things we'd do next to
-              take your social up a level.
+              Get to the end and you'll unlock{" "}
+              <strong className="text-cream">the three things we'd do next to take your social,
+              and this collaboration, to the next level</strong>.
             </Bullet>
           )}
         </div>
-        <button
-          className="btn-primary mt-8 w-full sm:w-auto"
-          onClick={() => {
-            setStep(Math.min(answers._step ?? 0, steps.length - 1));
-            setPhase("questions");
-          }}
-        >
-          {resuming ? "Pick up where I left off" : "Let's go"}
-        </button>
-      </Centered>
+        <div className="mt-8 flex justify-end">
+          <button
+            className="btn-primary w-full sm:w-auto"
+            onClick={() => {
+              music.start();
+              setTimeout(() => setMusicOn(music.isOn()), 60);
+              setStep(Math.min(answers._step ?? 0, steps.length - 1));
+              setPhase("questions");
+            }}
+          >
+            {resuming ? "Pick up where I left off" : "Let's go"}
+          </button>
+        </div>
+        </div>
+      </Shell>
     );
   }
 
@@ -191,12 +212,10 @@ export default function Survey({ slug }: { slug: string }) {
   const last = step === steps.length - 1;
 
   return (
-    <div className="mx-auto flex min-h-full max-w-2xl flex-col px-6 py-8 sm:py-12">
+    <Shell musicOn={musicOn} onToggleMusic={toggleMusic}>
       <div className="mb-8">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
-            Kaimakki
-          </span>
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <Logo className="h-7" />
           <span className="text-xs text-cream-31">
             {step + 1} of {steps.length}
           </span>
@@ -215,7 +234,7 @@ export default function Survey({ slug }: { slug: string }) {
         <div className="mt-7">{current.body}</div>
       </div>
 
-      <div className="mt-10 flex items-center justify-between gap-4 pb-4">
+      <div className="mt-10 flex items-center justify-end gap-3 pb-4">
         <button
           className="btn-ghost"
           onClick={() => {
@@ -234,7 +253,7 @@ export default function Survey({ slug }: { slug: string }) {
           {saving ? "Saving…" : last ? "Finish" : current.answered ? "Next" : "Skip"}
         </button>
       </div>
-    </div>
+    </Shell>
   );
 }
 
@@ -283,6 +302,7 @@ function buildSteps(
     },
     {
       title: "How likely are you to recommend Kaimakki to another business in your niche?",
+      hint: "Assuming they're not a competitor of yours, of course ;)",
       body: (
         <PointScale
           min={0}
@@ -296,8 +316,8 @@ function buildSteps(
       answered: typeof a.nps === "number",
     },
     {
-      title: "Pitch us to a friend who runs a business.",
-      hint: "What are your top three selling points for Kaimakki?",
+      title: "Pitch us to a friend of yours who runs a business.",
+      hint: "What are your top three selling points for Kaimakki? Not what we say about ourselves, but the three things you'd actually lead with over a coffee. These end up being the words we use when we talk to people like you.",
       body: (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
@@ -320,7 +340,7 @@ function buildSteps(
     },
     {
       title: "And the one caveat you'd give them?",
-      hint: "\"Kaimakki are great, but…\" — this tells us who we're not the right fit for, which is just as useful as knowing who we are.",
+      hint: "\"Kaimakki are great, but…\" This tells us who we're not the right fit for, which is just as useful as knowing who we are.",
       body: (
         <textarea
           rows={5}
@@ -348,7 +368,7 @@ function buildSteps(
     },
     {
       title: "How can we improve Kaimakki for you?",
-      hint: "Please be specific and be blunt. This is the question we act on hardest.",
+      hint: "If we don't know what is not working, we cannot get better. So please be specific and be blunt. The more the better.",
       body: (
         <textarea
           rows={5}
@@ -362,18 +382,18 @@ function buildSteps(
     },
     {
       title: `Where does ${am} sit on each of these?`,
-      hint: "Borrowed from Aristotle: every strength is a middle point between two extremes. The centre is the good answer — the ends are both ways of overdoing it.",
+      hint: "Borrowed from Aristotle: every strength is a middle point between two extremes. The centre is the good answer. The ends are both ways of overdoing it.",
       body: (
         <div className="space-y-7">
-          {VIRTUES.map((v, i) => (
+          {VIRTUES.map((v) => (
             <div key={v.key}>
               <p className="mb-2 font-display text-sm font-bold text-cream">{v.name}</p>
               <VirtueScale
                 low={v.low}
+                mid={v.mid}
                 high={v.high}
                 value={a.virtues?.[v.key]}
                 onChange={(pos) => setVirtue(v.key, pos)}
-                showCentreHint={i === 0}
               />
             </div>
           ))}
@@ -383,7 +403,7 @@ function buildSteps(
     },
     {
       title: `What would make ${am} a 10x social media manager for you?`,
-      hint: "Not in general — for you specifically.",
+      hint: "Not in general. For you specifically.",
       body: (
         <textarea
           rows={5}
@@ -418,20 +438,12 @@ function buildSteps(
           className="field"
           value={a.anything_else ?? ""}
           onChange={(e) => set("anything_else", e.target.value)}
-          placeholder="Optional — but we read every one of these."
+          placeholder="Optional, but we read every one of these."
         />
       ),
       answered: filled(a.anything_else),
     },
   ];
-}
-
-function Centered({ children }: { children: ReactNode }) {
-  return (
-    <main className="mx-auto flex min-h-full max-w-xl flex-col justify-center px-6 py-16">
-      <div className="animate-fade-up">{children}</div>
-    </main>
-  );
 }
 
 function Bullet({ children }: { children: ReactNode }) {

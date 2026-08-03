@@ -14,7 +14,7 @@ export type SurveyLink = {
   completed: boolean;
   /** Whether a reveal was written, so the welcome screen only promises a real one. */
   has_reveal: boolean;
-  /** Both null until they complete — the server withholds them. */
+  /** Both null until they complete. The server withholds them. */
   reveal_feedback: string | null;
   reveal_recommendations: string[] | null;
 };

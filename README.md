@@ -4,16 +4,16 @@ Personalised feedback surveys for Kaimakki clients. Each client gets their own l
 (`/acme-coffee-roasters_a7b4zu`) with their name and a message from their account manager.
 
 **Live:** https://productnerd.github.io/kaimakki-client-survey/
-**Admin:** append `/admin` — passcode-gated.
+**Admin:** append `/admin`, passcode-gated.
 
 ## The survey
 
 Ten questions: how disappointed they'd be without us (1–7), NPS, three selling points,
 the one caveat they'd give a friend, main benefit, what to improve, a ten-dimension read
 on the account manager, what would make that person 10x for them, where they shine, and
-an open box. Every question is skippable — the button reads *Skip* until they answer.
+an open box. Every question is skippable: the button reads *Skip* until they answer.
 
-The account-manager rating uses Aristotle's golden mean — each dimension is a seven-point
+The account-manager rating uses Aristotle's golden mean. Each dimension is a seven-point
 scale running from a deficiency to an excess, and **the centre is the good answer**, so a
 client can say "too cautious" or "too reckless" rather than just "good/bad". Scored as
 distance from centre: dead centre 100, the extremes 0.
@@ -41,7 +41,7 @@ npm run lint
 ## How the data is protected
 
 All three tables have RLS enabled with **zero policies**, so the anon key in
-`src/lib/config.ts` reads nothing directly — a client cannot enumerate other clients'
+`src/lib/config.ts` reads nothing directly. A client cannot enumerate other clients'
 links or read anybody's answers. Everything goes through `SECURITY DEFINER` functions:
 
 | Function | Caller | Does |
@@ -66,7 +66,7 @@ Hook Studio). Override the model with a `SURVEY_REPORT_MODEL` secret; the defaul
 `claude-opus-5`.
 
 The admin passcode is stored as a bcrypt hash (cost 12) in `kaimakki_survey_config` and
-compared inside Postgres — it is never in the frontend bundle, and there is no
+compared inside Postgres. It is never in the frontend bundle, and there is no
 service_role key in the browser. The internal `kaimakki_survey_auth` helper is not
 granted to `anon`, so it can't be used as a passcode oracle.
 

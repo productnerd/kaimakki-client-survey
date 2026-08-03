@@ -32,7 +32,7 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
     ? Math.round(((promoters - detractors) / npsValues.length) * 100)
     : null;
 
-  // PMF: the Sean Ellis benchmark is 40% "very disappointed" — here, the top two
+  // PMF: the Sean Ellis benchmark is 40% "very disappointed", here the top two
   // points of the 1–7 scale.
   const pmf = done
     .map((l) => l.answers?.pmf)
@@ -52,23 +52,23 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <BigStat
           label="PMF score"
-          value={pmfScore === null ? "—" : `${pmfScore}%`}
+          value={pmfScore === null ? "-" : `${pmfScore}%`}
           note={
             pmfScore === null
               ? undefined
-              : `scoring ${PMF_VERY_FROM}–${PMF_MAX} · ${pmfScore >= 40 ? "above" : "below"} the 40% benchmark`
+              : `scoring ${PMF_VERY_FROM}-${PMF_MAX} · ${pmfScore >= 40 ? "above" : "below"} the 40% benchmark`
           }
           good={pmfScore !== null && pmfScore >= 40}
         />
         <BigStat
           label="NPS"
-          value={nps === null ? "—" : String(nps)}
+          value={nps === null ? "-" : String(nps)}
           note={`${promoters} promoter${promoters === 1 ? "" : "s"}, ${detractors} detractor${detractors === 1 ? "" : "s"}`}
           good={nps !== null && nps >= 50}
         />
         <BigStat
           label="Avg balance"
-          value={avgBalance === null ? "—" : `${Math.round(avgBalance)}`}
+          value={avgBalance === null ? "-" : `${Math.round(avgBalance)}`}
           note="100 = dead centre on every virtue"
           good={avgBalance !== null && avgBalance >= 70}
         />
@@ -103,7 +103,7 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
         </Panel>
       </div>
 
-      <Panel title="Virtue balance — everyone">
+      <Panel title="Virtue balance across everyone">
         <p className="mb-5 text-sm text-cream-61">
           Where the bar sits shows which way clients think the team leans. Dead centre is the
           goal.
@@ -137,10 +137,10 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
                       <td className="py-3 font-display font-bold">{m}</td>
                       <td className="py-3 text-cream-61">{rows.length}</td>
                       <td className="py-3 text-cream-61">
-                        {mNps === null ? "—" : mNps.toFixed(1)}
+                        {mNps === null ? "-" : mNps.toFixed(1)}
                       </td>
                       <td className="py-3 text-cream-61">
-                        {mBal === null ? "—" : Math.round(mBal)}
+                        {mBal === null ? "-" : Math.round(mBal)}
                       </td>
                     </tr>
                   );
@@ -179,7 +179,7 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
 
       <Panel title="Who we're not right for">
         <p className="mb-5 text-sm text-cream-61">
-          The caveat each client would give a friend — the clearest signal of which leads to
+          The caveat each client would give a friend. The clearest signal of which leads to
           walk away from.
         </p>
         <Quotes
@@ -234,7 +234,7 @@ function VirtueChart({ links }: { links: AdminLink[] }) {
                 balance !== null && balance < 60 ? "text-accent" : ""
               }`}
             >
-              {balance === null ? "—" : Math.round(balance)}
+              {balance === null ? "-" : Math.round(balance)}
             </span>
           </div>
         );

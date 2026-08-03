@@ -28,7 +28,7 @@ export default function App() {
       </p>
       <h1 className="q-title mt-4">This one's personal.</h1>
       <p className="mt-4 text-cream-61">
-        Client surveys live at their own private link. Check the message we sent you — or
+        Client surveys live at their own private link. Check the message we sent you, or
         ping your account manager and they'll send it again.
       </p>
     </main>

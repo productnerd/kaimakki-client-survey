@@ -4,7 +4,7 @@
  * navigator.clipboard.writeText() is rejected by some browsers (Safari most
  * strictly) when it is called after an await, because the call no longer counts
  * as being inside the user's click. Creating a link involves a round trip to the
- * database first, so that is exactly the situation here — hence the
+ * database first, so that is exactly the situation here, hence the
  * execCommand fallback, which has no such requirement.
  */
 export async function copyText(text: string): Promise<boolean> {

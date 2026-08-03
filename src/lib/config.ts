@@ -1,4 +1,4 @@
-// Supabase project: SeeHer (shared multi-app backend). Anon key is public by design —
+// Supabase project: SeeHer (shared multi-app backend). Anon key is public by design:
 // every survey table has RLS on with zero policies, so this key alone reads nothing.
 export const SUPABASE_URL = "https://knftyqkhampkqchoncel.supabase.co";
 export const SUPABASE_ANON_KEY =

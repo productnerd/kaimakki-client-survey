@@ -4,21 +4,21 @@ const POSITIONS = Array.from({ length: VIRTUE_EXTENT * 2 + 1 }, (_, i) => i - VI
 
 /**
  * Five-point scale where the centre is the good answer (Aristotle's mean).
- * Deliberately unselected until tapped — a drag slider would park a default
+ * Deliberately unselected until tapped: a drag slider would park a default
  * answer at the centre and quietly inflate every score.
  */
 export function VirtueScale({
   low,
+  mid,
   high,
   value,
   onChange,
-  showCentreHint = false,
 }: {
   low: string;
+  mid: string;
   high: string;
   value: number | undefined;
   onChange: (v: number) => void;
-  showCentreHint?: boolean;
 }) {
   return (
     <div>
@@ -53,16 +53,14 @@ export function VirtueScale({
         })}
       </div>
 
-      {showCentreHint && (
-        <p className="mt-1 text-center text-[10px] uppercase tracking-wider text-cream-31">
-          centre = balanced
-        </p>
-      )}
+      {/* The mean is the good answer, so name the behaviour rather than
+          leaving the client to infer it from the two extremes. */}
+      <p className="mt-2 text-center text-[11px] leading-snug text-lime/70">{mid}</p>
     </div>
   );
 }
 
-/** Numbered scale — NPS runs 0–10, the disappointment question runs 1–7. */
+/** Numbered scale: NPS runs 0-10, the disappointment question runs 1-7. */
 export function PointScale({
   min,
   max,

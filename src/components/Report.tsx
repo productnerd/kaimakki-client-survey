@@ -41,7 +41,7 @@ export default function Report({
           <h2 className="font-display text-lg font-bold">Synthesised report</h2>
           <p className="mt-1 text-sm text-cream-61">
             {locked
-              ? `Unlocks at ${REPORT_MINIMUM} completed responses — ${completedCount} so far.`
+              ? `Unlocks at ${REPORT_MINIMUM} completed responses. ${completedCount} so far.`
               : "Every response, read together and turned into something you can act on."}
           </p>
         </div>
@@ -65,14 +65,14 @@ export default function Report({
 
       {stale && !busy && (
         <p className="mt-4 text-sm text-cream-31">
-          Written from {report.response_count} responses — {completedCount} are in now.
+          Written from {report.response_count} responses. {completedCount} are in now.
           Regenerate to include the newest.
         </p>
       )}
 
       {busy && (
         <p className="mt-6 animate-breathe text-cream-31">
-          Reading {completedCount} responses and writing it up — this takes a moment.
+          Reading {completedCount} responses and writing it up. This takes a moment.
         </p>
       )}
 
