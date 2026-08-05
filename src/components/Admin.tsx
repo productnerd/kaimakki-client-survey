@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminArchive, adminCreate, adminList, type AdminLink, type RevealPoint } from "../lib/api";
 import { copyText } from "../lib/clipboard";
-import { ACCOUNT_MANAGERS, VALUE_GROUPS, VALUE_ITEMS, VIRTUES } from "../lib/survey";
+import {
+  ACCOUNT_MANAGERS,
+  VALUE_GROUPS,
+  VALUE_ITEMS,
+  VIRTUES,
+  WELCOME_INTRO,
+  welcomeHeading,
+} from "../lib/survey";
 import Analytics from "./Analytics";
 import Report from "./Report";
 import ResponseDetail from "./ResponseDetail";
@@ -222,14 +229,17 @@ function LinksTab({
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="welcome_message">Welcome message</label>
+          <label className="label flex items-center gap-1.5" htmlFor="welcome_message">
+            Welcome message
+            <PrecedingCopy contact={form.contact_name || form.client_name} />
+          </label>
           <textarea
             id="welcome_message"
             rows={4}
             className="field"
             value={form.welcome_message}
             onChange={(e) => setForm({ ...form, welcome_message: e.target.value })}
-            placeholder="A line or two of context, in your voice."
+            placeholder="A line or two of context, in your voice. This follows the standard opening."
           />
         </div>
         <PointsFieldset
@@ -317,6 +327,58 @@ function LinksTab({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Shows the fixed copy that already sits above the welcome note, so nobody
+ * writes it twice.
+ *
+ * Driven by state rather than a CSS hover variant: phones have no hover, so a
+ * tap has to open it too.
+ */
+function PrecedingCopy({ contact }: { contact: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <span className="relative inline-flex normal-case tracking-normal">
+      <button
+        type="button"
+        aria-label="See the copy that appears above the welcome message"
+        aria-expanded={open}
+        className={`flex h-5 w-5 items-center justify-center rounded-full transition ${
+          open ? "text-accent" : "text-cream-31 hover:text-accent"
+        }`}
+        onClick={() => setOpen((o) => !o)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+      >
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </button>
+      {open && (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-72 -translate-x-1/2 animate-fade-up rounded-2xl border border-cream-20 bg-background/95 p-4 text-left shadow-2xl shadow-black/60 backdrop-blur-md"
+        >
+          <span className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-cream-31">
+            Already shown above your message
+          </span>
+          <span className="block font-display text-sm font-black text-cream">
+            {welcomeHeading(contact.trim() || "their name")}
+          </span>
+          {WELCOME_INTRO.map((line, i) => (
+            <span key={i} className="mt-1.5 block text-xs leading-relaxed text-cream-61">
+              {line}
+            </span>
+          ))}
+        </span>
+      )}
+    </span>
   );
 }
 

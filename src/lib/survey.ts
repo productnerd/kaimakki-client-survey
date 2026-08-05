@@ -20,6 +20,17 @@ export type Answers = {
 
 export const ACCOUNT_MANAGERS = ["Gos", "Maria"];
 
+/**
+ * The fixed copy every client sees before their personal welcome note. Shared
+ * with the admin form so the "what comes before this" preview stays honest.
+ */
+export const welcomeHeading = (name: string) => `Hi ${name}, got five minutes?`;
+
+export const WELCOME_INTRO = [
+  "It's August \u2600\ufe0f You're hopefully horizontal somewhere with a cold brew or bubbly \ud83e\udd42 in hand.",
+  "We have been at this together for a while now, so we would like to know how we can be better for you.",
+];
+
 export const PMF_MIN = 1;
 export const PMF_MAX = 7;
 /** Top two points count as "very disappointed" for the 40% product-market-fit benchmark. */

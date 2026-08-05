@@ -7,6 +7,8 @@ import {
   VALUE_MAX,
   VALUE_MIN,
   VIRTUES,
+  WELCOME_INTRO,
+  welcomeHeading,
   type Answers,
 } from "../lib/survey";
 import { PointScale, VirtueScale } from "./Scales";
@@ -164,16 +166,13 @@ export default function Survey({ slug }: { slug: string }) {
       <Shell musicOn={music.on} onToggleMusic={music.toggle}>
         <div className="animate-fade-up">
         <h1 className="q-title">
-          Hi {link.contact_name || link.client_name}, got five minutes?
+          {welcomeHeading(link.contact_name || link.client_name)}
         </h1>
-        <p className="mt-4 text-cream-78">
-          It's August ☀️ You're hopefully horizontal somewhere with a cold brew or bubbly 🥂
-          in hand.
-        </p>
-        <p className="mt-3 text-cream-78">
-          We have been at this together for a while now, so we would like to know how we can
-          be better for you.
-        </p>
+        {WELCOME_INTRO.map((line, i) => (
+          <p key={i} className={`${i === 0 ? "mt-4" : "mt-3"} text-cream-78`}>
+            {line}
+          </p>
+        ))}
         {link.welcome_message && (
           <div className="mt-3">
             <RichText value={link.welcome_message} className="text-cream-78" />
