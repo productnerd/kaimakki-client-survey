@@ -9,6 +9,9 @@ export type Answers = {
   main_benefit?: string;
   improve?: string;
   nps?: number;
+  values?: Record<string, number>;
+  /** Optional free text per value group, keyed by group key. */
+  value_notes?: Record<string, string>;
   virtues?: Record<string, number>;
   am_advice?: string;
   am_shines?: string;
@@ -21,6 +24,56 @@ export const PMF_MIN = 1;
 export const PMF_MAX = 7;
 /** Top two points count as "very disappointed" for the 40% product-market-fit benchmark. */
 export const PMF_VERY_FROM = 6;
+
+/**
+ * The company values, each rated through statements a client can actually
+ * judge. Grouped so the value reads as an overline over its statements.
+ */
+export const VALUE_GROUPS: {
+  key: string;
+  value: string;
+  items: { key: string; name: string; statement: string }[];
+}[] = [
+  {
+    key: "freedom",
+    value: "Freedom with ownership",
+    items: [
+      { key: "reliability", name: "Reliability", statement: "They delivered what they promised, when they promised, and came back to me quickly when I needed them." },
+      { key: "ownership", name: "Ownership", statement: "I never felt I had to chase them." },
+    ],
+  },
+  {
+    key: "ethics",
+    value: "Ethics above profit",
+    items: [
+      { key: "integrity", name: "Moral integrity", statement: "They advised what was right for us, even when it earned them less." },
+      { key: "trust", name: "Trust", statement: "They have earned my trust, and my brand's trust, throughout the collaboration." },
+    ],
+  },
+  {
+    key: "craft",
+    value: "Craft over content",
+    items: [
+      { key: "creativity", name: "Creativity", statement: "They challenged us with ideas we hadn't considered, rather than only the easy or predictable ones." },
+      { key: "meraki", name: "Meraki", statement: "The final result exceeded my expectations." },
+    ],
+  },
+  {
+    key: "empathy",
+    value: "Empathy without ego",
+    items: [
+      { key: "respect", name: "Respect & psychological safety", statement: "I felt respected and listened to, and safe to be transparent and honest with them." },
+      { key: "humanity", name: "Humanity", statement: "It felt like a human relationship, not a business transaction." },
+    ],
+  },
+];
+
+export const VALUE_ITEMS = VALUE_GROUPS.flatMap((g) =>
+  g.items.map((i) => ({ ...i, value: g.value })),
+);
+
+export const VALUE_MIN = 1;
+export const VALUE_MAX = 10;
 
 /**
  * Aristotle's golden mean: each virtue sits between a deficiency and an excess,

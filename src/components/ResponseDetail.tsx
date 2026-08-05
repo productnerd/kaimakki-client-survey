@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { AdminLink } from "../lib/api";
-import { PMF_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
+import { PMF_MAX, VALUE_GROUPS, VALUE_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
 
 export default function ResponseDetail({
   link,
@@ -84,6 +84,43 @@ export default function ResponseDetail({
 
           <Answer q="How we can improve">
             <Text value={a.improve} />
+          </Answer>
+
+          <Answer q="Living up to our values">
+            <div className="space-y-3">
+              {VALUE_GROUPS.map((group) => {
+                const scored = group.items.filter((i) => typeof a.values?.[i.key] === "number");
+                const note = a.value_notes?.[group.key]?.trim();
+                if (!scored.length && !note) return null;
+                return (
+                  <div key={group.value}>
+                    <p className="text-[10px] uppercase tracking-wider text-cream-31">
+                      {group.value}
+                    </p>
+                    {scored.map((i) => (
+                      <div key={i.key} className="flex items-center gap-3 text-sm">
+                        <span className="w-24 shrink-0 text-cream-61">{i.name}</span>
+                        <div className="h-1.5 flex-1 rounded-full bg-cream-10">
+                          <div
+                            className="h-full rounded-full bg-accent"
+                            style={{ width: `${(a.values![i.key] / VALUE_MAX) * 100}%` }}
+                          />
+                        </div>
+                        <span className="w-10 shrink-0 text-right font-display font-bold">
+                          {a.values![i.key]}
+                        </span>
+                      </div>
+                    ))}
+                    {a.value_notes?.[group.key]?.trim() && (
+                      <p className="mt-1 text-sm italic text-cream-78">
+                        "{a.value_notes[group.key]}"
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+              {!a.values && <Empty />}
+            </div>
           </Answer>
 
           <Answer q={`${am}: balance across the virtues`}>

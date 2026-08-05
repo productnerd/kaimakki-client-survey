@@ -77,16 +77,17 @@ export function PointScale({
   highLabel: string;
 }) {
   const points = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  // 11 points won't fit one phone row; 7 will.
-  const wraps = points.length > 7;
+  // Only 7 fit across a phone; wider scales wrap to two rows there. Written as
+  // whole class names so Tailwind keeps them.
+  const grid =
+    points.length <= 7
+      ? "grid-cols-7"
+      : points.length === 10
+        ? "grid-cols-5 sm:grid-cols-10"
+        : "grid-cols-6 sm:grid-cols-11";
   return (
     <div>
-      <div
-        className={`grid gap-2 ${wraps ? "grid-cols-6 sm:grid-cols-11" : ""}`}
-        style={
-          wraps ? undefined : { gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }
-        }
-      >
+      <div className={`grid gap-2 ${grid}`}>
         {points.map((n) => {
           const selected = value === n;
           return (

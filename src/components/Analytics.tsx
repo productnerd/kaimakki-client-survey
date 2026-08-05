@@ -3,6 +3,8 @@ import {
   PMF_MAX,
   PMF_MIN,
   PMF_VERY_FROM,
+  VALUE_GROUPS,
+  VALUE_MAX,
   VIRTUE_EXTENT,
   VIRTUES,
   balanceScore,
@@ -102,6 +104,43 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
           />
         </Panel>
       </div>
+
+      <Panel title="Living up to our values">
+        <p className="mb-5 text-sm text-cream-61">
+          Average score out of {VALUE_MAX} across every completed response.
+        </p>
+        <div className="space-y-5">
+          {VALUE_GROUPS.map((group) => (
+            <div key={group.value}>
+              <p className="label text-accent">{group.value}</p>
+              <div className="space-y-2">
+                {group.items.map((item) => {
+                  const scores = done
+                    .map((l) => l.answers?.values?.[item.key])
+                    .filter((n): n is number => typeof n === "number");
+                  const avg = mean(scores);
+                  return (
+                    <div key={item.key} className="flex items-center gap-3 text-sm">
+                      <span className="w-24 shrink-0 text-cream-78 sm:w-28">{item.name}</span>
+                      <div className="h-2 flex-1 rounded-full bg-cream-10">
+                        {avg !== null && (
+                          <div
+                            className={`h-full rounded-full ${avg >= 8 ? "bg-lime" : avg >= 6 ? "bg-accent" : "bg-cream-31"}`}
+                            style={{ width: `${(avg / VALUE_MAX) * 100}%` }}
+                          />
+                        )}
+                      </div>
+                      <span className="w-10 shrink-0 text-right font-display font-bold">
+                        {avg === null ? "-" : avg.toFixed(1)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
 
       <Panel title="Virtue balance across everyone">
         <p className="mb-5 text-sm text-cream-61">

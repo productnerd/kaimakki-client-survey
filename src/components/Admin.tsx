@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminArchive, adminCreate, adminList, type AdminLink } from "../lib/api";
 import { copyText } from "../lib/clipboard";
-import { ACCOUNT_MANAGERS, VIRTUES } from "../lib/survey";
+import { ACCOUNT_MANAGERS, VALUE_GROUPS, VALUE_ITEMS, VIRTUES } from "../lib/survey";
 import Analytics from "./Analytics";
 import Report from "./Report";
 import ResponseDetail from "./ResponseDetail";
@@ -461,6 +461,8 @@ function downloadCsv(links: AdminLink[]) {
     "catch",
     "main_benefit",
     "improve",
+    ...VALUE_ITEMS.map((v) => `value_${v.key}`),
+    ...VALUE_GROUPS.map((g) => `notes_${g.key}`),
     ...VIRTUES.map((v) => `virtue_${v.key}`),
     "advice",
     "shines",
@@ -484,6 +486,8 @@ function downloadCsv(links: AdminLink[]) {
       a.caveat ?? "",
       a.main_benefit ?? "",
       a.improve ?? "",
+      ...VALUE_ITEMS.map((v) => a.values?.[v.key] ?? ""),
+      ...VALUE_GROUPS.map((g) => a.value_notes?.[g.key] ?? ""),
       ...VIRTUES.map((v) => a.virtues?.[v.key] ?? ""),
       a.am_advice ?? "",
       a.am_shines ?? "",

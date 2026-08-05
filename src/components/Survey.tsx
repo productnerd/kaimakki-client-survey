@@ -1,6 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { openSurvey, saveSurvey, type SurveyLink } from "../lib/api";
-import { PMF_MAX, PMF_MIN, VIRTUES, type Answers } from "../lib/survey";
+import {
+  PMF_MAX,
+  PMF_MIN,
+  VALUE_GROUPS,
+  VALUE_MAX,
+  VALUE_MIN,
+  VIRTUES,
+  type Answers,
+} from "../lib/survey";
 import { PointScale, VirtueScale } from "./Scales";
 import { Shell, useMusic } from "./Shell";
 import Confetti from "./Confetti";
@@ -40,6 +48,14 @@ export default function Survey({ slug }: { slug: string }) {
   // two taps batched into one render would otherwise drop the first.
   function setVirtue(key: string, position: number) {
     setAnswers((prev) => ({ ...prev, virtues: { ...(prev.virtues ?? {}), [key]: position } }));
+  }
+
+  function setValueScore(key: string, score: number) {
+    setAnswers((prev) => ({ ...prev, values: { ...(prev.values ?? {}), [key]: score } }));
+  }
+
+  function setValueNote(key: string, text: string) {
+    setAnswers((prev) => ({ ...prev, value_notes: { ...(prev.value_notes ?? {}), [key]: text } }));
   }
 
   function setSellingPoint(index: number, value: string) {
@@ -144,7 +160,7 @@ export default function Survey({ slug }: { slug: string }) {
 
   if (phase === "welcome") {
     const resuming = Object.keys(answers).length > 0;
-    const steps = buildSteps(link, answers, set, setVirtue, setSellingPoint);
+    const steps = buildSteps(link, answers, set, setVirtue, setValueScore, setValueNote, setSellingPoint);
     return (
       <Shell musicOn={music.on} onToggleMusic={music.toggle}>
         <div className="animate-fade-up">
@@ -194,7 +210,7 @@ export default function Survey({ slug }: { slug: string }) {
               setPhase("questions");
             }}
           >
-            {resuming ? "Pick up where I left off" : "Let's go"}
+            {resuming ? "Resume" : "Let's go"}
           </button>
         </div>
         </div>
@@ -202,7 +218,7 @@ export default function Survey({ slug }: { slug: string }) {
     );
   }
 
-  const steps = buildSteps(link, answers, set, setVirtue, setSellingPoint);
+  const steps = buildSteps(link, answers, set, setVirtue, setValueScore, setValueNote, setSellingPoint);
   const current = steps[step];
   const last = step === steps.length - 1;
 
@@ -261,6 +277,8 @@ function buildSteps(
   a: Answers,
   set: <K extends keyof Answers>(k: K, v: Answers[K]) => void,
   setVirtue: (key: string, position: number) => void,
+  setValueScore: (key: string, score: number) => void,
+  setValueNote: (key: string, text: string) => void,
   setSellingPoint: (index: number, value: string) => void,
 ): Step[] {
   const am = link.account_manager;
@@ -376,6 +394,47 @@ function buildSteps(
         />
       ),
       answered: filled(a.improve),
+    },
+    {
+      title: "How well did we live up to what we say we stand for?",
+      hint: "These are the values we hold ourselves to. Rate how true each one felt in practice, 1 being not at all and 10 being completely.",
+      body: (
+        <div className="space-y-8">
+          {VALUE_GROUPS.map((group) => (
+            <div key={group.value}>
+              <p className="label text-accent">{group.value}</p>
+              <div className="space-y-6">
+                {group.items.map((item) => (
+                  <div key={item.key}>
+                    <p className="font-display text-sm font-bold text-cream">{item.name}</p>
+                    <p className="mb-3 text-sm text-cream-61">"{item.statement}"</p>
+                    <PointScale
+                      min={VALUE_MIN}
+                      max={VALUE_MAX}
+                      value={a.values?.[item.key]}
+                      onChange={(v) => {
+                        play("select");
+                        setValueScore(item.key, v);
+                      }}
+                      lowLabel="Not at all"
+                      highLabel="Completely"
+                    />
+                  </div>
+                ))}
+                <textarea
+                  rows={2}
+                  className="field text-sm"
+                  aria-label={`Comments on ${group.value}`}
+                  value={a.value_notes?.[group.key] ?? ""}
+                  onChange={(e) => setValueNote(group.key, e.target.value)}
+                  placeholder="Anything to add here? (optional)"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+      answered: Object.keys(a.values ?? {}).length > 0,
     },
     {
       title: `Where does ${am} sit on each of these?`,
