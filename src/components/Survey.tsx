@@ -397,7 +397,7 @@ function buildSteps(
     },
     {
       title: "How well did we live up to what we say we stand for?",
-      hint: "These are the values we hold ourselves to. Rate how true each one felt in practice, 1 being not at all and 10 being completely.",
+      hint: "These are the values we hold ourselves to.",
       body: (
         <div className="space-y-8">
           {VALUE_GROUPS.map((group) => (

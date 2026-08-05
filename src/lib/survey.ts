@@ -84,7 +84,7 @@ export const VIRTUES: { key: string; name: string; low: string; mid: string; hig
   { key: "courage", name: "Courage", low: "Plays it too safe", mid: "Takes real swings, picks the moment", high: "Reckless with your brand" },
   { key: "temperance", name: "Temperance", low: "Never rides a trend", mid: "Rides the trends that fit you", high: "Chases every trend, no discipline" },
   { key: "generosity", name: "Generosity", low: "Hard to reach, does the minimum", mid: "Gives you plenty, sustainably", high: "Always on, no boundaries" },
-  { key: "ambition", name: "Ambition", low: "Thinks too small", mid: "Big ideas they can actually land", high: "Grand ideas, shaky execution" },
+  { key: "ambition", name: "Ambition", low: "Thinks too small", mid: "Big ideas that can actually land", high: "Grand ideas, shaky execution" },
   { key: "self_regard", name: "Self-regard", low: "Undersells their own worth", mid: "Confident, keeps it about you", high: "Makes the work about themselves" },
   { key: "composure", name: "Composure", low: "Too unbothered when things go wrong", mid: "Steady, and takes it seriously", high: "Gets rattled or defensive" },
   { key: "truthfulness", name: "Truthfulness", low: "Undersells the work", mid: "Tells you straight, promises what lands", high: "Overpromises" },

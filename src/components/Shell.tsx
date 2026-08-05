@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { setSfxEnabled } from "../lib/sfx";
 
 const asset = (file: string) => `${import.meta.env.BASE_URL}${file}`;
 
@@ -117,7 +116,8 @@ const STORAGE_KEY = "kaimakki_survey_music";
  *
  * `on` tracks intent rather than the element's paused flag: the fade means the
  * element is still playing for a moment after you mute, and the button has to
- * respond instantly.
+ * respond instantly. It governs the music only; the interaction sounds are
+ * always on.
  */
 export function useMusic() {
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -159,7 +159,6 @@ export function useMusic() {
     el.volume = 0;
     el.preload = "auto";
     audio.current = el;
-    setSfxEnabled(localStorage.getItem(STORAGE_KEY) !== "off");
 
     let cleanup = () => {};
     if (localStorage.getItem(STORAGE_KEY) !== "off") {
@@ -191,7 +190,6 @@ export function useMusic() {
     setOn((was) => {
       const next = !was;
       localStorage.setItem(STORAGE_KEY, next ? "on" : "off");
-      setSfxEnabled(next);
       if (next) startPlayback(600).catch(() => {});
       else rampTo(0, 400);
       return next;

@@ -3,7 +3,7 @@
  * short tones cost nothing to download and stay perfectly in the brand's
  * quiet register.
  *
- * Follows the music toggle, so muting the music silences these too.
+ * Independent of the music toggle: muting the music leaves these audible.
  */
 type Sound = "select" | "next" | "back";
 
@@ -16,14 +16,8 @@ const SHAPES: Record<Sound, { from: number; to: number; ms: number; gain: number
 };
 
 let ctx: AudioContext | null = null;
-let enabled = true;
-
-export function setSfxEnabled(on: boolean) {
-  enabled = on;
-}
 
 export function play(sound: Sound) {
-  if (!enabled) return;
   try {
     ctx ??= new AudioContext();
     if (ctx.state === "suspended") void ctx.resume();
