@@ -63,7 +63,7 @@ export default function RichText({
           <img
             src={`https://media.giphy.com/media/${id}/giphy.gif`}
             alt=""
-            className={`max-h-64 w-auto max-w-full rounded-2xl border border-cream-20 ${
+            className={`mx-auto block h-auto w-3/4 rounded-2xl border border-cream-20 ${
               text || i > 0 ? "mt-3" : ""
             }`}
           />
