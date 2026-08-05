@@ -57,7 +57,7 @@ export function Shell({
         <img
           src={asset("kaimakki-logo.png")}
           alt="Kaimakki Studio"
-          className="absolute left-1/2 top-6 h-8 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-7 sm:h-9"
+          className="absolute left-1/2 top-6 h-9 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-7 sm:h-11"
         />
         <div className="glass w-full max-w-xl p-5 sm:p-8">{children}</div>
       </div>
