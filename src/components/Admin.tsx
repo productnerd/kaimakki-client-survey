@@ -5,6 +5,7 @@ import { ACCOUNT_MANAGERS, VALUE_GROUPS, VALUE_ITEMS, VIRTUES } from "../lib/sur
 import Analytics from "./Analytics";
 import Report from "./Report";
 import ResponseDetail from "./ResponseDetail";
+import { Logo, Shell, VideoBackdrop } from "./Shell";
 
 const PASSCODE_KEY = "kaimakki_survey_passcode";
 type Tab = "links" | "responses" | "analytics" | "report";
@@ -65,22 +66,15 @@ export default function Admin() {
   const refresh = () => load(passcode).catch(() => setAuthed(false));
 
   if (checking) {
-    return (
-      <main className="flex min-h-full items-center justify-center">
-        <p className="animate-breathe text-cream-31">Loading…</p>
-      </main>
-    );
+    return <Shell><p className="animate-breathe text-center text-cream-31">Loading…</p></Shell>;
   }
 
   if (!authed) {
     return (
-      <main className="mx-auto flex min-h-full max-w-sm flex-col justify-center px-6">
-        <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          Kaimakki
-        </p>
-        <h1 className="q-title mt-3">Client survey admin</h1>
-        <form onSubmit={signIn} className="mt-8">
-          <label className="label" htmlFor="passcode">Passcode</label>
+      <Shell>
+        <h1 className="q-title text-center">Client survey admin</h1>
+        <form onSubmit={signIn} className="mx-auto mt-6 max-w-xs">
+          <label className="label text-center" htmlFor="passcode">Passcode</label>
           <input
             id="passcode"
             type="password"
@@ -89,27 +83,28 @@ export default function Admin() {
             autoFocus
             onChange={(e) => setPasscode(e.target.value)}
           />
-          {error && <p className="mt-3 text-sm text-accent">{error}</p>}
+          {error && <p className="mt-3 text-center text-sm text-accent">{error}</p>}
           <button className="btn-primary mt-5 w-full" disabled={busy || !passcode}>
             {busy ? "Checking…" : "Enter"}
           </button>
         </form>
-      </main>
+      </Shell>
     );
   }
 
   const responded = links.filter((l) => l.completed_at);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
-            Kaimakki
-          </p>
-          <h1 className="font-display text-2xl font-bold">Client survey</h1>
-        </div>
-        <nav className="flex gap-1 rounded-full border border-border bg-surface p-1">
+    <div className="relative min-h-full">
+      <VideoBackdrop />
+      <div className="relative mx-auto max-w-6xl px-6 py-8">
+      <header className="flex flex-col items-center gap-4 text-center">
+        <Logo />
+        {/* Sits on the raw video, so it needs the same shadow the logo carries. */}
+        <h1 className="font-display text-xl font-bold [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
+          Client survey
+        </h1>
+        <nav className="flex gap-1 rounded-full border border-cream-20 bg-background/50 p-1 backdrop-blur-md">
           {(["links", "responses", "analytics", "report"] as Tab[]).map((t) => (
             <button
               key={t}
@@ -132,6 +127,7 @@ export default function Admin() {
         {tab === "responses" && <ResponsesTab links={responded} />}
         {tab === "analytics" && <Analytics links={links} />}
         {tab === "report" && <Report passcode={passcode} completedCount={responded.length} />}
+      </div>
       </div>
     </div>
   );

@@ -66,8 +66,11 @@ body {
 }
 
 @layer components {
+  /* Frosted like the survey panel, so the video backdrop shows through the
+     admin as well. */
   .card {
-    @apply rounded-brand border border-border bg-surface;
+    @apply rounded-brand border border-cream-20 bg-background/60 shadow-2xl
+           shadow-black/40 backdrop-blur-xl;
   }
 
   /* Frosted panel the survey floats in. There is no scrim over the video, so

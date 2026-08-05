@@ -7,15 +7,8 @@ const asset = (file: string) => `${import.meta.env.BASE_URL}${file}`;
  * over it. Contrast comes from the frosted panel the content sits in, so the
  * video stays vibrant everywhere around it.
  */
-export function Shell({
-  children,
-  musicOn,
-  onToggleMusic,
-}: {
-  children: ReactNode;
-  musicOn?: boolean;
-  onToggleMusic?: () => void;
-}) {
+/** The looping backdrop, shared by the survey and the admin screens. */
+export function VideoBackdrop() {
   const video = useRef<HTMLVideoElement>(null);
 
   // Some browsers park a muted autoplay video when the tab starts hidden or
@@ -31,18 +24,42 @@ export function Shell({
   }, []);
 
   return (
+    <video
+      ref={video}
+      className="pointer-events-none fixed inset-0 h-full w-full object-cover"
+      src={asset("welcome-bg.mp4")}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+    />
+  );
+}
+
+export function Logo({ className = "h-9 sm:h-11" }: { className?: string }) {
+  return (
+    <img
+      src={asset("kaimakki-logo.png")}
+      alt="Kaimakki Studio"
+      className={`${className} w-auto [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))]`}
+    />
+  );
+}
+
+export function Shell({
+  children,
+  musicOn,
+  onToggleMusic,
+}: {
+  children: ReactNode;
+  musicOn?: boolean;
+  onToggleMusic?: () => void;
+}) {
+  return (
     <div className="relative min-h-full">
-      <video
-        ref={video}
-        className="pointer-events-none fixed inset-0 h-full w-full object-cover"
-        src={asset("welcome-bg.mp4")}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-      />
+      <VideoBackdrop />
 
       {onToggleMusic && <MusicButton on={!!musicOn} onClick={onToggleMusic} />}
 
@@ -53,11 +70,9 @@ export function Shell({
           which left the panel sitting high. dvh keeps it right on mobile,
           where the browser chrome comes and goes. */}
       <div className="relative flex min-h-screen min-h-dvh items-center justify-center px-4 py-24 sm:px-6 sm:py-28">
-        <img
-          src={asset("kaimakki-logo.png")}
-          alt="Kaimakki Studio"
-          className="absolute left-1/2 top-6 h-9 w-auto -translate-x-1/2 [filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.55))_drop-shadow(0_6px_18px_rgba(0,0,0,0.65))] sm:top-7 sm:h-11"
-        />
+        <div className="absolute left-1/2 top-6 -translate-x-1/2 sm:top-7">
+          <Logo />
+        </div>
         <div className="glass w-full max-w-xl p-5 sm:p-8">{children}</div>
       </div>
     </div>
