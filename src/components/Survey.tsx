@@ -12,7 +12,7 @@ import {
 import { PointScale, VirtueScale } from "./Scales";
 import { Shell, useMusic } from "./Shell";
 import Confetti from "./Confetti";
-import { play } from "../lib/sfx";
+import { play, playKeystroke } from "../lib/sfx";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
 
@@ -65,6 +65,21 @@ export default function Survey({ slug }: { slug: string }) {
       return { ...prev, selling_points: next };
     });
   }
+
+  // A typewriter clack per key, on any of the survey's text fields. One
+  // document listener rather than a handler on each of the many inputs.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
+      // Only keys that actually put a character down, plus the two that undo one.
+      const typed = e.key.length === 1 || e.key === "Backspace" || e.key === "Enter";
+      if (!typed || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      playKeystroke();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   async function advance(to: number, complete = false) {
     setSaving(true);
@@ -173,7 +188,7 @@ export default function Survey({ slug }: { slug: string }) {
         </p>
         <p className="mt-3 text-cream-78">
           We have been at this together for a while now, so we would like to know how we can
-          be better for you and as professionals.
+          be better for you.
         </p>
         {link.welcome_message && (
           <p className="mt-3 whitespace-pre-wrap text-cream-78">{link.welcome_message}</p>
@@ -222,8 +237,47 @@ export default function Survey({ slug }: { slug: string }) {
   const current = steps[step];
   const last = step === steps.length - 1;
 
+  function goBack() {
+    play("back");
+    setStep((s) => Math.max(0, s - 1));
+    window.scrollTo({ top: 0 });
+  }
+
+  function goNext() {
+    play("next");
+    advance(step + 1, last);
+  }
+
+  /**
+   * Swipe between steps on touch devices. Ignores gestures that start on a
+   * control, so scrubbing a scale or selecting text in a box still works, and
+   * requires the movement to be clearly horizontal so it never fights a scroll.
+   */
+  function swipe() {
+    let x = 0;
+    let y = 0;
+    let armed = false;
+    return {
+      onTouchStart: (e: React.TouchEvent) => {
+        const el = e.target as HTMLElement;
+        armed = !el.closest("input, textarea, button, select, a");
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      },
+      onTouchEnd: (e: React.TouchEvent) => {
+        if (!armed || saving) return;
+        const dx = e.changedTouches[0].clientX - x;
+        const dy = e.changedTouches[0].clientY - y;
+        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
+        if (dx < 0 && !last) goNext();
+        if (dx > 0 && step > 0) goBack();
+      },
+    };
+  }
+
   return (
     <Shell musicOn={music.on} onToggleMusic={music.toggle}>
+      <div {...swipe()}>
       <div className="mb-8">
         <p className="mb-2 text-center text-xs text-cream-31">
           {step + 1} of {steps.length}
@@ -246,25 +300,19 @@ export default function Survey({ slug }: { slug: string }) {
       <div className="mt-8 flex items-center justify-between gap-3">
         <button
           className="btn-ghost"
-          onClick={() => {
-            play("back");
-            setStep((s) => Math.max(0, s - 1));
-            window.scrollTo({ top: 0 });
-          }}
+          onClick={goBack}
           disabled={step === 0 || saving}
         >
           Back
         </button>
         <button
           className={current.answered || last ? "btn-primary" : "btn-ghost"}
-          onClick={() => {
-            play("next");
-            advance(step + 1, last);
-          }}
+          onClick={goNext}
           disabled={saving}
         >
           {saving ? "Saving…" : last ? "Finish" : current.answered ? "Next" : "Skip"}
         </button>
+      </div>
       </div>
     </Shell>
   );
