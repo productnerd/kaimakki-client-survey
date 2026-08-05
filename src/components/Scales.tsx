@@ -90,17 +90,29 @@ export function PointScale({
       <div className={`grid gap-2 ${grid}`}>
         {points.map((n) => {
           const selected = value === n;
+          // The chosen box carries its own weight: pale pink at the bottom of
+          // the scale, fully saturated at the top.
+          const strength = 0.22 + ((n - min) / (max - min)) * 0.78;
           return (
             <button
               key={n}
               type="button"
               onClick={() => onChange(n)}
               aria-pressed={selected}
-              className={`aspect-square rounded-2xl border font-display text-sm font-bold transition ${
+              className={`aspect-square rounded-2xl border font-display text-sm font-black transition ${
                 selected
-                  ? "border-accent bg-accent text-brown"
+                  ? "border-accent"
                   : "border-cream-20 text-cream-61 hover:border-cream-31 hover:text-cream"
               }`}
+              style={
+                selected
+                  ? {
+                      backgroundColor: `rgba(237,164,232,${strength})`,
+                      // Brown only once the pink is solid enough to carry it.
+                      color: strength > 0.6 ? "#211305" : "#fff8e6",
+                    }
+                  : undefined
+              }
             >
               {n}
             </button>

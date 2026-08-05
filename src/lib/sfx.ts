@@ -9,9 +9,10 @@ type Sound = "select" | "next" | "back";
 const SHAPES: Record<Sound, { from: number; to: number; ms: number; gain: number }> = {
   // A soft blip when picking an option.
   select: { from: 760, to: 980, ms: 90, gain: 0.05 },
-  // Rising for forward, falling for back.
-  next: { from: 540, to: 810, ms: 130, gain: 0.045 },
-  back: { from: 700, to: 460, ms: 130, gain: 0.04 },
+  // Pitch carries the direction: forward rises in the upper register, back
+  // falls in the lower one. Skip reuses back.
+  next: { from: 700, to: 1050, ms: 130, gain: 0.045 },
+  back: { from: 520, to: 360, ms: 130, gain: 0.04 },
 };
 
 let ctx: AudioContext | null = null;

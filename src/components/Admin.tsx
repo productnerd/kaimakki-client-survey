@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { adminArchive, adminCreate, adminList, type AdminLink } from "../lib/api";
+import { adminArchive, adminCreate, adminList, type AdminLink, type RevealPoint } from "../lib/api";
 import { copyText } from "../lib/clipboard";
 import { ACCOUNT_MANAGERS, VALUE_GROUPS, VALUE_ITEMS, VIRTUES } from "../lib/survey";
 import Analytics from "./Analytics";
@@ -147,8 +147,8 @@ function LinksTab({
     contact_name: "",
     welcome_message: "",
     account_manager: ACCOUNT_MANAGERS[0],
-    reveal_feedback: "",
-    reveal_recommendations: ["", "", ""],
+    reveal_appreciate: emptyPoints(),
+    reveal_recommendations: emptyPoints(),
   };
   const [form, setForm] = useState(blank);
   const [toast, setToast] = useState<{ message: string; ok: boolean } | null>(null);
@@ -160,7 +160,12 @@ function LinksTab({
     e.preventDefault();
     setBusy(true);
     setError("");
-    const res = await adminCreate(passcode, form);
+    // Blank points would show as empty bullets on the reveal.
+    const res = await adminCreate(passcode, {
+      ...form,
+      reveal_appreciate: form.reveal_appreciate.filter((p) => p.title.trim() || p.body.trim()),
+      reveal_recommendations: form.reveal_recommendations.filter((p) => p.title.trim() || p.body.trim()),
+    });
     setBusy(false);
     if (!res.ok || !res.slug) return setError(res.error ?? "Could not create the link.");
 
@@ -227,40 +232,22 @@ function LinksTab({
             placeholder="A line or two of context, in your voice."
           />
         </div>
-        <div>
-          <label className="label" htmlFor="reveal_feedback">
-            Reveal: how the collaboration is going
-          </label>
-          <textarea
-            id="reveal_feedback"
-            rows={4}
-            className="field"
-            value={form.reveal_feedback}
-            onChange={(e) => setForm({ ...form, reveal_feedback: e.target.value })}
-            placeholder="Your honest read on working with them. Unlocked only when they finish."
-          />
-        </div>
-        <div>
-          <span className="label">Reveal: three things we'd do next</span>
-          <div className="space-y-2">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="font-display text-sm font-bold text-cream-31">{i + 1}</span>
-                <input
-                  className="field"
-                  aria-label={`Recommendation ${i + 1}`}
-                  value={form.reveal_recommendations[i]}
-                  onChange={(e) => {
-                    const next = [...form.reveal_recommendations];
-                    next[i] = e.target.value;
-                    setForm({ ...form, reveal_recommendations: next });
-                  }}
-                  placeholder={i === 0 ? "The biggest lever" : "And…"}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <PointsFieldset
+          legend="Reveal: what we love about working with you"
+          hint="Three things you genuinely appreciate about their business and the collaboration."
+          name="appreciate"
+          points={form.reveal_appreciate}
+          onChange={(reveal_appreciate) => setForm({ ...form, reveal_appreciate })}
+          titlePlaceholder={["You brief like nobody else", "And…", "And…"]}
+        />
+        <PointsFieldset
+          legend="Reveal: three things we'd do next"
+          hint="Unlocked only when they finish the survey."
+          name="recommendation"
+          points={form.reveal_recommendations}
+          onChange={(reveal_recommendations) => setForm({ ...form, reveal_recommendations })}
+          titlePlaceholder={["The biggest lever", "And…", "And…"]}
+        />
 
         {error && <p className="text-sm text-accent">{error}</p>}
         <button className="btn-primary w-full" disabled={busy}>
@@ -328,6 +315,65 @@ function LinksTab({
             })}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+const emptyPoints = (): RevealPoint[] => [
+  { title: "", body: "" },
+  { title: "", body: "" },
+  { title: "", body: "" },
+];
+
+/** Three titled points with a paragraph each, used by both reveal sections. */
+function PointsFieldset({
+  legend,
+  hint,
+  name,
+  points,
+  onChange,
+  titlePlaceholder,
+}: {
+  legend: string;
+  hint: string;
+  name: string;
+  points: RevealPoint[];
+  onChange: (points: RevealPoint[]) => void;
+  titlePlaceholder: string[];
+}) {
+  const edit = (i: number, patch: Partial<RevealPoint>) => {
+    const next = points.map((p, j) => (i === j ? { ...p, ...patch } : p));
+    onChange(next);
+  };
+
+  return (
+    <div>
+      <span className="label">{legend}</span>
+      <p className="mb-3 -mt-1 text-xs text-cream-31">{hint}</p>
+      <div className="space-y-3">
+        {points.map((p, i) => (
+          <div key={i} className="rounded-2xl border border-cream-20 bg-background/30 p-3">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-sm font-black text-accent">{i + 1}</span>
+              <input
+                className="field"
+                aria-label={`${name} ${i + 1} title`}
+                value={p.title}
+                onChange={(e) => edit(i, { title: e.target.value })}
+                placeholder={titlePlaceholder[i]}
+              />
+            </div>
+            <textarea
+              rows={2}
+              className="field mt-2 text-sm"
+              aria-label={`${name} ${i + 1} description`}
+              value={p.body}
+              onChange={(e) => edit(i, { body: e.target.value })}
+              placeholder="A sentence or two explaining it."
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

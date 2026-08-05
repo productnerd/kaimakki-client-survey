@@ -135,7 +135,10 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   if (phase === "done") {
-    const recommendations = (link.reveal_recommendations ?? []).filter((r) => r?.trim());
+    const filled = (points: { title: string; body: string }[] | null) =>
+      (points ?? []).filter((p) => p.title?.trim() || p.body?.trim());
+    const appreciate = filled(link.reveal_appreciate);
+    const recommendations = filled(link.reveal_recommendations);
     return (
       <Shell musicOn={music.on} onToggleMusic={music.toggle}>
         <Confetti />
@@ -147,28 +150,8 @@ export default function Survey({ slug }: { slug: string }) {
           Genuinely, this is the stuff that changes how we work. Every answer gets read.
         </p>
 
-        {link.reveal_feedback && (
-          <div className="mt-6 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
-            <p className="label">💬 Our honest read on working together</p>
-            <p className="whitespace-pre-wrap leading-relaxed text-cream-78">
-              {link.reveal_feedback}
-            </p>
-          </div>
-        )}
-
-        {recommendations.length > 0 && (
-          <div className="mt-3 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
-            <p className="label">🚀 Three things we'd do next</p>
-            <ol className="space-y-3">
-              {recommendations.map((r, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="font-display font-bold text-accent">{i + 1}</span>
-                  <span className="leading-relaxed text-cream-78">{r}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
+        <RevealSection label="💚 What we love about working with you" points={appreciate} />
+        <RevealSection label="🚀 Three things we'd do next" points={recommendations} />
       </Shell>
     );
   }
@@ -244,7 +227,8 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   function goNext() {
-    play("next");
+    // Skipping is not really progress, so it gets the lower back tone.
+    play(current.answered || last ? "next" : "back");
     advance(step + 1, last);
   }
 
@@ -548,6 +532,36 @@ function buildSteps(
       answered: filled(a.anything_else),
     },
   ];
+}
+
+function RevealSection({
+  label,
+  points,
+}: {
+  label: string;
+  points: { title: string; body: string }[];
+}) {
+  if (!points.length) return null;
+  return (
+    <div className="mt-6 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
+      <p className="label">{label}</p>
+      <ol className="space-y-4">
+        {points.map((p, i) => (
+          <li key={i} className="flex gap-3">
+            <span className="font-display font-black text-accent">{i + 1}</span>
+            <div>
+              {p.title?.trim() && (
+                <p className="font-display font-bold text-cream">{p.title}</p>
+              )}
+              {p.body?.trim() && (
+                <p className="mt-0.5 leading-relaxed text-cream-78">{p.body}</p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 function Bullet({ children }: { children: ReactNode }) {

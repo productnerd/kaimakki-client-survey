@@ -15,9 +15,12 @@ export type SurveyLink = {
   /** Whether a reveal was written, so the welcome screen only promises a real one. */
   has_reveal: boolean;
   /** Both null until they complete. The server withholds them. */
-  reveal_feedback: string | null;
-  reveal_recommendations: string[] | null;
+  reveal_appreciate: RevealPoint[] | null;
+  reveal_recommendations: RevealPoint[] | null;
 };
+
+/** One titled point in either reveal section. */
+export type RevealPoint = { title: string; body: string };
 
 export type AdminLink = {
   id: string;
@@ -26,8 +29,8 @@ export type AdminLink = {
   contact_name: string | null;
   welcome_message: string | null;
   account_manager: string;
-  reveal_feedback: string | null;
-  reveal_recommendations: string[] | null;
+  reveal_appreciate: RevealPoint[];
+  reveal_recommendations: RevealPoint[];
   created_at: string;
   opened_at: string | null;
   archived: boolean;
@@ -70,8 +73,8 @@ export function adminCreate(
     contact_name: string;
     welcome_message: string;
     account_manager: string;
-    reveal_feedback: string;
-    reveal_recommendations: string[];
+    reveal_appreciate: RevealPoint[];
+    reveal_recommendations: RevealPoint[];
   },
 ) {
   return rpc<{ ok: boolean; error?: string; slug?: string }>(
@@ -82,7 +85,7 @@ export function adminCreate(
       p_contact_name: fields.contact_name,
       p_welcome_message: fields.welcome_message,
       p_account_manager: fields.account_manager,
-      p_reveal_feedback: fields.reveal_feedback,
+      p_reveal_appreciate: fields.reveal_appreciate,
       p_reveal_recommendations: fields.reveal_recommendations,
     },
   );
