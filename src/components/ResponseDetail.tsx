@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { AdminLink } from "../lib/api";
 import { PMF_MAX, VALUE_GROUPS, VALUE_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
+import RichText from "./RichText";
 
 export default function ResponseDetail({
   link,
@@ -112,9 +113,9 @@ export default function ResponseDetail({
                       </div>
                     ))}
                     {a.value_notes?.[group.key]?.trim() && (
-                      <p className="mt-1 text-sm italic text-cream-78">
-                        "{a.value_notes[group.key]}"
-                      </p>
+                      <div className="mt-1 text-sm italic">
+                        <RichText value={a.value_notes[group.key]} className="text-cream-78" />
+                      </div>
                     )}
                   </div>
                 );
@@ -191,7 +192,7 @@ function Answer({ q, children }: { q: string; children: React.ReactNode }) {
 
 function Text({ value }: { value?: string }) {
   if (!value?.trim()) return <Empty />;
-  return <p className="whitespace-pre-wrap leading-relaxed text-cream-78">{value}</p>;
+  return <RichText value={value} className="leading-relaxed text-cream-78" />;
 }
 
 function Empty() {

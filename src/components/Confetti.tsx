@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 
 const COLOURS = ["#eda4e8", "#ddf073", "#fff8e6"];
-const COUNT = 140;
-const LIFE_MS = 4200;
+const PER_CANNON = 90;
+/** The right cannon follows the left one, so it reads as two shots. */
+const SECOND_CANNON_DELAY_MS = 190;
+const LIFE_MS = 5200;
 
 type Piece = {
   x: number;
@@ -13,9 +15,11 @@ type Piece = {
   colour: string;
   spin: number;
   angle: number;
+  /** Held at the muzzle until its cannon fires. */
+  delay: number;
 };
 
-/** One canvas burst on completion, then it removes itself. */
+/** Two corner cannons fired up and inward, then gravity brings it all down. */
 export default function Confetti() {
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -28,25 +32,40 @@ export default function Confetti() {
     if (!ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = window.innerWidth;
+    let h = window.innerHeight;
     const resize = () => {
-      el.width = window.innerWidth * dpr;
-      el.height = window.innerHeight * dpr;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      el.width = w * dpr;
+      el.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    const w = () => el.width / dpr;
-    const pieces: Piece[] = Array.from({ length: COUNT }, () => ({
-      x: w() * (0.15 + Math.random() * 0.7),
-      y: -20 - Math.random() * window.innerHeight * 0.4,
-      vx: (Math.random() - 0.5) * 2.4,
-      vy: 2 + Math.random() * 3.5,
-      size: 5 + Math.random() * 7,
-      colour: COLOURS[Math.floor(Math.random() * COLOURS.length)],
-      spin: (Math.random() - 0.5) * 0.25,
-      angle: Math.random() * Math.PI,
-    }));
+    const cannon = (originX: number, aim: 1 | -1, delay: number): Piece[] =>
+      Array.from({ length: PER_CANNON }, () => {
+        // Up and inward, with enough spread that it fans rather than streams.
+        const angle = (Math.PI / 180) * (55 + Math.random() * 32);
+        const speed = 15 + Math.random() * 11;
+        return {
+          x: originX + aim * Math.random() * 40,
+          y: h + 10,
+          vx: Math.cos(angle) * speed * aim,
+          vy: -Math.sin(angle) * speed,
+          size: 5 + Math.random() * 7,
+          colour: COLOURS[Math.floor(Math.random() * COLOURS.length)],
+          spin: (Math.random() - 0.5) * 0.3,
+          angle: Math.random() * Math.PI,
+          delay,
+        };
+      });
+
+    const pieces = [
+      ...cannon(-10, 1, 0),
+      ...cannon(w + 10, -1, SECOND_CANNON_DELAY_MS),
+    ];
 
     let raf = 0;
     let last = 0;
@@ -59,16 +78,18 @@ export default function Confetti() {
       const dt = last ? Math.min(now - last, 50) : 16.7;
       last = now;
       life += dt;
-      const speed = dt / 16.7; // keep the fall rate the same on any refresh rate
+      const speed = dt / 16.7; // keep the arc the same on any refresh rate
 
-      const fade = Math.max(0, 1 - Math.max(0, life - LIFE_MS * 0.6) / (LIFE_MS * 0.4));
-      ctx.clearRect(0, 0, w(), el.height / dpr);
+      const fade = Math.max(0, 1 - Math.max(0, life - LIFE_MS * 0.65) / (LIFE_MS * 0.35));
+      ctx.clearRect(0, 0, w, h);
 
       for (const p of pieces) {
+        if (life < p.delay) continue;
+
         p.x += p.vx * speed;
         p.y += p.vy * speed;
-        p.vy += 0.045 * speed; // gravity
-        p.vx *= 1 - 0.005 * speed;
+        p.vy += 0.38 * speed; // gravity turns the launch into an arc
+        p.vx *= 1 - 0.008 * speed; // air drag, so they drift rather than fly straight
         p.angle += p.spin * speed;
 
         ctx.save();
@@ -84,7 +105,7 @@ export default function Confetti() {
       if (life < LIFE_MS) {
         raf = requestAnimationFrame(frame);
       } else {
-        ctx.clearRect(0, 0, w(), el.height / dpr);
+        ctx.clearRect(0, 0, w, h);
       }
     };
     raf = requestAnimationFrame(frame);

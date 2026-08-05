@@ -10,6 +10,8 @@ import {
   balanceScore,
 } from "../lib/survey";
 
+import RichText from "./RichText";
+
 const mean = (ns: number[]) => (ns.length ? ns.reduce((s, n) => s + n, 0) / ns.length : null);
 
 export default function Analytics({ links }: { links: AdminLink[] }) {
@@ -346,7 +348,7 @@ function Quotes({ items }: { items: { text: string; who: string }[] }) {
     <ul className="space-y-3">
       {items.map((it, i) => (
         <li key={i} className="border-l-2 border-cream-20 pl-4">
-          <p className="text-cream-78">{it.text}</p>
+          <RichText value={it.text} className="text-cream-78" />
           <p className="mt-1 text-xs text-cream-31">{it.who}</p>
         </li>
       ))}

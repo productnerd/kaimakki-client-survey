@@ -12,6 +12,7 @@ import {
 import { PointScale, VirtueScale } from "./Scales";
 import { Shell, useMusic } from "./Shell";
 import Confetti from "./Confetti";
+import RichText from "./RichText";
 import { play, playKeystroke } from "../lib/sfx";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
@@ -174,12 +175,14 @@ export default function Survey({ slug }: { slug: string }) {
           be better for you.
         </p>
         {link.welcome_message && (
-          <p className="mt-3 whitespace-pre-wrap text-cream-78">{link.welcome_message}</p>
+          <div className="mt-3">
+            <RichText value={link.welcome_message} className="text-cream-78" />
+          </div>
         )}
         <div className="mt-6 space-y-3 rounded-2xl border border-cream-20 bg-background/30 p-5 text-left">
           <Bullet>
             <strong className="text-cream">{steps.length} questions</strong>, about five
-            minutes. Most are a tap; a few have a box to type in.
+            minutes.
           </Bullet>
           <Bullet>
             We're trying to get better as a{" "}
@@ -554,7 +557,9 @@ function RevealSection({
                 <p className="font-display font-bold text-cream">{p.title}</p>
               )}
               {p.body?.trim() && (
-                <p className="mt-0.5 leading-relaxed text-cream-78">{p.body}</p>
+                <div className="mt-0.5">
+                  <RichText value={p.body} className="leading-relaxed text-cream-78" />
+                </div>
               )}
             </div>
           </li>
