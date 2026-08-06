@@ -8,14 +8,15 @@ const RIFFLE = "0123456789";
 const RIFFLE_MS = 55;
 const RIFFLE_TICKS = 7;
 
-function remaining(): { days: number; hours: number; mins: number; past: boolean } {
+function remaining(): { days: number; hours: number; mins: number; secs: number; past: boolean } {
   const ms = RESTART.getTime() - Date.now();
-  if (ms <= 0) return { days: 0, hours: 0, mins: 0, past: true };
-  const mins = Math.floor(ms / 60000);
+  if (ms <= 0) return { days: 0, hours: 0, mins: 0, secs: 0, past: true };
+  const total = Math.floor(ms / 1000);
   return {
-    days: Math.floor(mins / 1440),
-    hours: Math.floor((mins % 1440) / 60),
-    mins: mins % 60,
+    days: Math.floor(total / 86400),
+    hours: Math.floor((total % 86400) / 3600),
+    mins: Math.floor((total % 3600) / 60),
+    secs: total % 60,
     past: false,
   };
 }
@@ -98,15 +99,17 @@ export default function Countdown() {
           Productions are rolling again. See you out there.
         </p>
       ) : (
-        <div className="flex items-start justify-center gap-4 sm:gap-6">
+        <div className="flex items-start justify-center gap-3 sm:gap-5">
           <Group value={time.days} label="Days" offset={0} />
-          <Group value={time.hours} label="Hours" offset={160} />
-          <Group value={time.mins} label="Mins" offset={320} />
+          <Group value={time.hours} label="Hours" offset={120} />
+          <Group value={time.mins} label="Mins" offset={240} />
+          {/* Seconds carry the motion, so they land immediately. */}
+          <Group value={time.secs} label="Secs" offset={0} />
         </div>
       )}
 
       <p className="mt-4 text-sm text-cream-78">
-        We are very excited to get back to work!
+        We are very excited to get back to it! 😎
       </p>
     </div>
   );
