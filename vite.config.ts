@@ -17,9 +17,8 @@ function spaFallback(): Plugin {
   }
 }
 
-// Base only for production build (GitHub Pages repo path). Dev serves at root
-// so the preview harness health-check on "/" succeeds.
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/kaimakki-client-survey/' : '/',
+// Served from the root of clientsurvey.kaimakki.com, so no repo subpath.
+export default defineConfig({
+  base: '/',
   plugins: [react(), spaFallback()],
-}))
+})
