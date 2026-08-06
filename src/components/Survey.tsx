@@ -14,6 +14,7 @@ import {
 import { PointScale, VirtueScale } from "./Scales";
 import { Shell, useMusic } from "./Shell";
 import Confetti from "./Confetti";
+import Countdown from "./Countdown";
 import RichText from "./RichText";
 import { play, playKeystroke } from "../lib/sfx";
 
@@ -164,6 +165,7 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
 
         <RevealSection label="💚 What we love about working with you" points={appreciate} />
         <RevealSection label="🚀 Three things we'd do next" points={recommendations} />
+        <Countdown />
       </Shell>
     );
   }
