@@ -3,7 +3,7 @@
 Personalised feedback surveys for Kaimakki clients. Each client gets their own link
 (`/acme-coffee-roasters_a7b4zu`) with their name and a message from their account manager.
 
-**Live:** https://clientsurvey.kaimakki.com/
+**Live:** https://productnerd.github.io/kaimakki-client-survey/
 **Admin:** append `/admin`, passcode-gated.
 
 ## The survey
@@ -80,13 +80,12 @@ select public.kaimakki_survey_admin_set_passcode('current-passcode', 'your-new-p
 
 ## Custom domain
 
-Served from `clientsurvey.kaimakki.com`. The DNS record at Google Cloud DNS for
-kaimakki.com is:
+To move from the github.io path to `clientsurvey.kaimakki.com`, add this DNS record at
+the registrar for kaimakki.com:
 
 ```
-CNAME   clientsurvey   productnerd.github.io.
+CNAME   clientsurvey   productnerd.github.io
 ```
 
-`public/CNAME` tells Pages which domain to answer on, and `base` in
-`vite.config.ts` is `/` because the app is at the domain root rather than a
-repo subpath. Slugs are unchanged from the github.io era.
+Then set the custom domain in the repo's Pages settings and change `base` in
+`vite.config.ts` to `/`. Existing slugs keep working.
