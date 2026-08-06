@@ -1,5 +1,3 @@
-import { Fragment } from "react";
-
 /**
  * Any Giphy URL in the text is swapped for the GIF itself and the link is
  * dropped, so a pasted URL reads as the picture it points at.
@@ -35,6 +33,33 @@ function giphyId(url: string): string | null {
   return null;
 }
 
+type Block = { kind: "text"; value: string } | { kind: "gif"; id: string };
+
+/**
+ * Splits the text at each GIF so the picture stays where it was pasted, on its
+ * own line, with whatever was written before it above and after it below.
+ */
+function toBlocks(value: string): Block[] {
+  const blocks: Block[] = [];
+  let cursor = 0;
+
+  for (const match of value.matchAll(GIPHY)) {
+    const id = giphyId(match[0]);
+    // Not a GIF we can resolve: leave the URL sitting in the text.
+    if (!id || match.index === undefined) continue;
+
+    const before = value.slice(cursor, match.index);
+    if (before.trim()) blocks.push({ kind: "text", value: before.trim() });
+    blocks.push({ kind: "gif", id });
+    cursor = match.index + match[0].length;
+  }
+
+  const tail = value.slice(cursor);
+  if (tail.trim()) blocks.push({ kind: "text", value: tail.trim() });
+
+  return blocks;
+}
+
 /** Text with any Giphy links rendered as the GIF instead of the URL. */
 export default function RichText({
   value,
@@ -43,32 +68,28 @@ export default function RichText({
   value: string;
   className?: string;
 }) {
-  const gifs: string[] = [];
-  const stripped = value.replace(GIPHY, (url) => {
-    const id = giphyId(url);
-    if (!id) return url; // not a GIF we can resolve, leave the text alone
-    gifs.push(id);
-    return "";
-  });
-
-  const text = stripped.replace(/[ \t]{2,}/g, " ").trim();
+  const blocks = toBlocks(value);
 
   return (
     <>
-      {text && <p className={`whitespace-pre-wrap ${className}`}>{text}</p>}
-      {gifs.map((id, i) => (
-        <Fragment key={`${id}-${i}`}>
-          {/* Not lazy: these sit inside the copy the reader is already looking
-              at, and they are small, so deferring only delays them. */}
+      {blocks.map((block, i) =>
+        block.kind === "text" ? (
+          <p key={i} className={`whitespace-pre-wrap ${i > 0 ? "mt-3" : ""} ${className}`}>
+            {block.value}
+          </p>
+        ) : (
+          // Not lazy: these sit inside the copy the reader is already looking
+          // at, and they are small, so deferring only delays them.
           <img
-            src={`https://media.giphy.com/media/${id}/giphy.gif`}
+            key={i}
+            src={`https://media.giphy.com/media/${block.id}/giphy.gif`}
             alt=""
             className={`mx-auto block h-auto w-3/4 rounded-2xl border border-cream-20 ${
-              text || i > 0 ? "mt-3" : ""
+              i > 0 ? "mt-3" : ""
             }`}
           />
-        </Fragment>
-      ))}
+        ),
+      )}
     </>
   );
 }
