@@ -155,9 +155,11 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
         </p>
-        <h1 className="q-title mt-2">Thank you, {link.contact_name || link.client_name} 🙌</h1>
+        <h1 className="q-title mt-2">
+          Thank you, {link.contact_name || link.client_name}, you are a rockstar 🙌
+        </h1>
         <p className="mt-4 text-cream-61">
-          Genuinely, this is the stuff that changes how we work. Every answer gets read.
+          Genuinely, this is the stuff that changes how we work.
         </p>
 
         <RevealSection label="💚 What we love about working with you" points={appreciate} />
@@ -196,9 +198,10 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
             worth more to us than kind ones.
           </Bullet>
           <Bullet>
-            Some questions are about{" "}
-            <strong className="text-cream">{link.account_manager}</strong> specifically.
-            Everything you share stays between us. I will share it with them personally.
+            Some questions are about your account manager,{" "}
+            <strong className="text-cream">{link.account_manager}</strong>, specifically. They
+            would really like to improve themselves, so they would appreciate as honest
+            feedback as possible. We won't take anything the wrong way, no worries 😉
           </Bullet>
           {link.has_reveal && (
             <Bullet>
@@ -494,9 +497,23 @@ function buildSteps(
               />
             </div>
           ))}
+          <div>
+            <label className="label" htmlFor="virtues_note">
+              Anything to add about {am}?{" "}
+              <span className="normal-case tracking-normal">(optional)</span>
+            </label>
+            <textarea
+              id="virtues_note"
+              rows={3}
+              className="field"
+              value={a.virtues_note ?? ""}
+              onChange={(e) => set("virtues_note", e.target.value)}
+              placeholder="In your own words."
+            />
+          </div>
         </div>
       ),
-      answered: Object.keys(a.virtues ?? {}).length > 0,
+      answered: Object.keys(a.virtues ?? {}).length > 0 || filled(a.virtues_note),
     },
     {
       title: `What would make ${am} a 10x social media manager for you?`,
@@ -514,7 +531,7 @@ function buildSteps(
     },
     {
       title: `What do you especially appreciate about ${am}?`,
-      hint: "Where do they shine? ✨ We'd love to be able to tell them.",
+      hint: "Where do they shine? ✨",
       body: (
         <textarea
           rows={5}

@@ -13,6 +13,8 @@ export type Answers = {
   /** Optional free text per value group, keyed by group key. */
   value_notes?: Record<string, string>;
   virtues?: Record<string, number>;
+  /** Open comment at the end of the virtue grid. */
+  virtues_note?: string;
   am_advice?: string;
   am_shines?: string;
   anything_else?: string;

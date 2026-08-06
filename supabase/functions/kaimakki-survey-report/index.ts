@@ -163,6 +163,7 @@ Deno.serve(async (req: Request) => {
         `Company values, rated 1 to 10: ${describeValues(a.values)}`,
         `Their comments on the values: ${describeValueNotes(a.value_notes)}`,
         `Account manager balance (0 = ideal middle, plus or minus 3 = extreme): ${describeVirtues(a.virtues)}`,
+        `Their comments on ${link.account_manager}: ${a.virtues_note?.trim() || "none"}`,
         `What would make ${link.account_manager} 10x for them: ${a.am_advice?.trim() || "skipped"}`,
         `Where ${link.account_manager} shines: ${a.am_shines?.trim() || "skipped"}`,
         `Anything else: ${a.anything_else?.trim() || "skipped"}`,

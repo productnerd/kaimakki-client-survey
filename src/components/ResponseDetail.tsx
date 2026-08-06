@@ -139,7 +139,12 @@ export default function ResponseDetail({
                   </div>
                 );
               })}
-              {!a.virtues && <Empty />}
+              {!a.virtues && !a.virtues_note?.trim() && <Empty />}
+              {a.virtues_note?.trim() && (
+                <div className="mt-2">
+                  <RichText value={a.virtues_note} className="text-sm italic text-cream-78" />
+                </div>
+              )}
             </div>
           </Answer>
 
