@@ -19,6 +19,11 @@ export default function App() {
   const route = currentRoute();
 
   if (route === "admin") return <Admin />;
+
+  // Test mode, written either way round: /test/acme_ab12cd or /acme_ab12cd/test.
+  const test = route.match(/^test\/(.+)$/) ?? route.match(/^(.+)\/test$/);
+  if (test) return <Survey slug={test[1]} preview />;
+
   if (route !== "") return <Survey slug={route} />;
 
   return (

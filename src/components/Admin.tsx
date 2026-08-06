@@ -21,6 +21,11 @@ function surveyUrl(slug: string) {
   return `${window.location.origin}${import.meta.env.BASE_URL}${slug}`;
 }
 
+/** Same survey, but nothing is recorded and the reveal is visible. */
+function testUrl(slug: string) {
+  return `${window.location.origin}${import.meta.env.BASE_URL}test/${slug}`;
+}
+
 function linkStatus(l: AdminLink) {
   if (l.completed_at) return { label: "Completed", tone: "text-lime" };
   if (l.started_at) return { label: "In progress", tone: "text-accent" };
@@ -311,6 +316,15 @@ function LinksTab({
                     {status.label}
                   </span>
                   <CopyButton text={surveyUrl(l.slug)} />
+                  <a
+                    href={testUrl(l.slug)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Walk this survey without recording anything"
+                    className="text-xs text-cream-31 underline-offset-2 hover:text-cream hover:underline"
+                  >
+                    Test
+                  </a>
                   <button
                     className="text-xs text-cream-31 underline-offset-2 hover:text-cream hover:underline"
                     onClick={async () => {

@@ -52,14 +52,22 @@ export function Shell({
   children,
   musicOn,
   onToggleMusic,
+  testMode = false,
 }: {
   children: ReactNode;
   musicOn?: boolean;
   onToggleMusic?: () => void;
+  testMode?: boolean;
 }) {
   return (
     <div className="relative min-h-full">
       <VideoBackdrop />
+
+      {testMode && (
+        <div className="fixed inset-x-0 top-0 z-50 bg-lime px-4 py-1.5 text-center font-display text-[11px] font-black uppercase tracking-wider text-brown">
+          Test mode · nothing is saved
+        </div>
+      )}
 
       {onToggleMusic && <MusicButton on={!!musicOn} onClick={onToggleMusic} />}
 
@@ -85,7 +93,7 @@ function MusicButton({ on, onClick }: { on: boolean; onClick: () => void }) {
       onClick={onClick}
       aria-label={on ? "Mute the music" : "Unmute the music"}
       aria-pressed={on}
-      className={`fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md transition sm:right-6 sm:top-6 ${
+      className={`fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md transition sm:right-6 sm:top-10 ${
         on
           ? "border-cream-20 bg-background/50 text-cream"
           : "border-cream-20 bg-background/50 text-cream-31"

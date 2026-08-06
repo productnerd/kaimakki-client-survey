@@ -46,9 +46,12 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-/** Returns null when the slug does not exist or has been archived. */
-export function openSurvey(slug: string) {
-  return rpc<SurveyLink | null>("kaimakki_survey_open", { p_slug: slug });
+/**
+ * Returns null when the slug does not exist or has been archived.
+ * `track: false` is test mode: no opened_at stamp, no draft, reveal shown.
+ */
+export function openSurvey(slug: string, track = true) {
+  return rpc<SurveyLink | null>("kaimakki_survey_open", { p_slug: slug, p_track: track });
 }
 
 export function saveSurvey(slug: string, answers: Answers, complete = false) {

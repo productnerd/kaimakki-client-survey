@@ -19,7 +19,7 @@ import { play, playKeystroke } from "../lib/sfx";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
 
-export default function Survey({ slug }: { slug: string }) {
+export default function Survey({ slug, preview = false }: { slug: string; preview?: boolean }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [link, setLink] = useState<SurveyLink | null>(null);
   const [answers, setAnswers] = useState<Answers>({});
@@ -29,7 +29,7 @@ export default function Survey({ slug }: { slug: string }) {
 
   useEffect(() => {
     let live = true;
-    openSurvey(slug)
+    openSurvey(slug, !preview)
       .then((data) => {
         if (!live) return;
         if (!data) return setPhase("notfound");
@@ -41,7 +41,7 @@ export default function Survey({ slug }: { slug: string }) {
     return () => {
       live = false;
     };
-  }, [slug]);
+  }, [slug, preview]);
 
   function set<K extends keyof Answers>(key: K, value: Answers[K]) {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -88,20 +88,27 @@ export default function Survey({ slug }: { slug: string }) {
     setSaving(true);
     const payload = { ...answers, _step: to };
     setAnswers(payload);
-    try {
-      await saveSurvey(slug, payload, complete);
-    } catch {
-      // A failed autosave shouldn't trap them mid-survey; the next step retries
-      // with the full answer set anyway.
+
+    // Test mode writes nothing at all.
+    if (!preview) {
+      try {
+        await saveSurvey(slug, payload, complete);
+      } catch {
+        // A failed autosave shouldn't trap them mid-survey; the next step
+        // retries with the full answer set anyway.
+      }
     }
 
     if (complete) {
       // Re-open to collect the reveal, which the server withholds until now.
-      try {
-        const fresh = await openSurvey(slug);
-        if (fresh) setLink(fresh);
-      } catch {
-        // Non-fatal: they still get the thank-you screen.
+      // A test run already has it.
+      if (!preview) {
+        try {
+          const fresh = await openSurvey(slug);
+          if (fresh) setLink(fresh);
+        } catch {
+          // Non-fatal: they still get the thank-you screen.
+        }
       }
       setSaving(false);
       setPhase("done");
@@ -113,7 +120,7 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   if (phase === "loading") {
-    return <Shell><p className="animate-breathe text-center text-cream-31">Loading…</p></Shell>;
+    return <Shell testMode={preview}><p className="animate-breathe text-center text-cream-31">Loading…</p></Shell>;
   }
 
   if (phase === "notfound") {
@@ -143,7 +150,7 @@ export default function Survey({ slug }: { slug: string }) {
     const appreciate = filled(link.reveal_appreciate);
     const recommendations = filled(link.reveal_recommendations);
     return (
-      <Shell musicOn={music.on} onToggleMusic={music.toggle}>
+      <Shell musicOn={music.on} onToggleMusic={music.toggle} testMode={preview}>
         <Confetti />
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-accent">
           All done
@@ -163,7 +170,7 @@ export default function Survey({ slug }: { slug: string }) {
     const resuming = Object.keys(answers).length > 0;
     const steps = buildSteps(link, answers, set, setVirtue, setValueScore, setValueNote, setSellingPoint);
     return (
-      <Shell musicOn={music.on} onToggleMusic={music.toggle}>
+      <Shell musicOn={music.on} onToggleMusic={music.toggle} testMode={preview}>
         <div className="animate-fade-up">
         <h1 className="q-title">
           {welcomeHeading(link.contact_name || link.client_name)}
@@ -262,7 +269,7 @@ export default function Survey({ slug }: { slug: string }) {
   }
 
   return (
-    <Shell musicOn={music.on} onToggleMusic={music.toggle}>
+    <Shell musicOn={music.on} onToggleMusic={music.toggle} testMode={preview}>
       <div {...swipe()}>
       <div className="mb-8">
         <p className="mb-2 text-center text-xs text-cream-31">
