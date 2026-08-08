@@ -116,7 +116,7 @@ function explainAnthropicError(status: number, raw: string): string {
     return "The Anthropic account behind this key is out of credit. Top it up in the Anthropic Console under Plans & Billing, then try again.";
   }
   if (status === 401 || /invalid x-api-key|authentication/i.test(message)) {
-    return "The ANTHROPIC_API_KEY on this Supabase project is invalid or expired. Replace it in the project's Edge Function secrets.";
+    return "The FISHBOWL_API_KEY on this Supabase project is invalid or expired. Replace it in the project's Edge Function secrets.";
   }
   if (status === 429 || /rate.?limit/i.test(message)) {
     return "Anthropic rate-limited the request. Wait a minute and try again.";
@@ -140,10 +140,14 @@ Deno.serve(async (req: Request) => {
     const { passcode } = await req.json();
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    // Same chain the fishbowl functions use. FISHBOWL_API_KEY is an Anthropic
+    // key on a funded account; ANTHROPIC_API_KEY on this project is out of credit.
+    const ANTHROPIC_API_KEY = Deno.env.get("FISHBOWL_API_KEY") ??
+      Deno.env.get("fishbowl_api_key") ??
+      Deno.env.get("ANTHROPIC_API_KEY");
 
     if (!ANTHROPIC_API_KEY) {
-      return json({ ok: false, error: "No ANTHROPIC_API_KEY is set on this Supabase project." }, 500);
+      return json({ ok: false, error: "No FISHBOWL_API_KEY is set on this Supabase project." }, 500);
     }
 
     const db = async (path: string, init: RequestInit = {}) => {
