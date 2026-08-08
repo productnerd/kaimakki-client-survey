@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { AdminLink } from "../lib/api";
-import { PMF_MAX, VALUE_GROUPS, VALUE_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
+import { PMF_MAX, STYLE_DIALS, VALUE_GROUPS, VALUE_MAX, VIRTUE_EXTENT, VIRTUES } from "../lib/survey";
 import RichText from "./RichText";
 
 export default function ResponseDetail({
@@ -85,6 +85,30 @@ export default function ResponseDetail({
 
           <Answer q="How we can improve">
             <Text value={a.improve} />
+          </Answer>
+
+          <Answer q="Where they want the videos to go">
+            <div className="space-y-2">
+              {STYLE_DIALS.map((d) => {
+                const pos = a.style?.[d.key];
+                if (typeof pos !== "number") return null;
+                return (
+                  <div key={d.key} className="flex items-center gap-3 text-xs">
+                    <span className="w-24 shrink-0 text-cream-61">{d.name}</span>
+                    <Diverging value={pos} />
+                    <span className="w-28 shrink-0 text-right text-cream-31">
+                      {pos === 0 ? "as is" : pos < 0 ? d.low : d.high}
+                    </span>
+                  </div>
+                );
+              })}
+              {!a.style && !a.style_note?.trim() && <Empty />}
+              {a.style_note?.trim() && (
+                <div className="mt-2">
+                  <RichText value={a.style_note} className="text-sm italic text-cream-78" />
+                </div>
+              )}
+            </div>
           </Answer>
 
           <Answer q="Living up to our values">

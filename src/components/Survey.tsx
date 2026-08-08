@@ -6,6 +6,7 @@ import {
   VALUE_GROUPS,
   VALUE_MAX,
   VALUE_MIN,
+  STYLE_DIALS,
   VIRTUES,
   WELCOME_INTRO,
   welcomeHeading,
@@ -16,6 +17,7 @@ import { Shell, useMusic } from "./Shell";
 import Confetti from "./Confetti";
 import Countdown from "./Countdown";
 import RichText from "./RichText";
+import InfoDot from "./InfoDot";
 import { play, playKeystroke } from "../lib/sfx";
 
 type Phase = "loading" | "notfound" | "error" | "welcome" | "questions" | "done";
@@ -56,6 +58,10 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
 
   function setValueScore(key: string, score: number) {
     setAnswers((prev) => ({ ...prev, values: { ...(prev.values ?? {}), [key]: score } }));
+  }
+
+  function setStyle(key: string, position: number) {
+    setAnswers((prev) => ({ ...prev, style: { ...(prev.style ?? {}), [key]: position } }));
   }
 
   function setValueNote(key: string, text: string) {
@@ -172,7 +178,7 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
 
   if (phase === "welcome") {
     const resuming = Object.keys(answers).length > 0;
-    const steps = buildSteps(link, answers, set, setVirtue, setValueScore, setValueNote, setSellingPoint);
+    const steps = buildSteps(link, answers, set, setVirtue, setStyle, setValueScore, setValueNote, setSellingPoint);
     return (
       <Shell musicOn={music.on} onToggleMusic={music.toggle} testMode={preview}>
         <div className="animate-fade-up">
@@ -230,7 +236,7 @@ export default function Survey({ slug, preview = false }: { slug: string; previe
     );
   }
 
-  const steps = buildSteps(link, answers, set, setVirtue, setValueScore, setValueNote, setSellingPoint);
+  const steps = buildSteps(link, answers, set, setVirtue, setStyle, setValueScore, setValueNote, setSellingPoint);
   const current = steps[step];
   const last = step === steps.length - 1;
 
@@ -323,6 +329,7 @@ function buildSteps(
   a: Answers,
   set: <K extends keyof Answers>(k: K, v: Answers[K]) => void,
   setVirtue: (key: string, position: number) => void,
+  setStyle: (key: string, position: number) => void,
   setValueScore: (key: string, score: number) => void,
   setValueNote: (key: string, text: string) => void,
   setSellingPoint: (index: number, value: string) => void,
@@ -440,6 +447,48 @@ function buildSteps(
         />
       ),
       answered: filled(a.improve),
+    },
+    {
+      title: "Where would you like the videos to go next?",
+      body: (
+        <div className="space-y-7">
+          <div className="flex justify-end">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-[11px] text-cream-78">
+              👀 = usually gets more views
+            </span>
+          </div>
+          {STYLE_DIALS.map((d) => (
+            <div key={d.key}>
+              <p className="mb-2 flex items-center gap-1.5 font-display text-sm font-bold text-cream">
+                {d.name}
+                {d.example && <InfoDot note={d.example} label={d.name} />}
+              </p>
+              <VirtueScale
+                low={d.views === "low" ? <>{d.low} <ViewsBadge /></> : d.low}
+                mid={d.mid}
+                high={d.views === "high" ? <>{d.high} <ViewsBadge /></> : d.high}
+                value={a.style?.[d.key]}
+                onChange={(pos) => { play("select"); setStyle(d.key, pos); }}
+              />
+            </div>
+          ))}
+          <div>
+            <label className="label" htmlFor="style_note">
+              Anything else about the style you want?{" "}
+              <span className="normal-case tracking-normal">(optional)</span>
+            </label>
+            <textarea
+              id="style_note"
+              rows={3}
+              className="field"
+              value={a.style_note ?? ""}
+              onChange={(e) => set("style_note", e.target.value)}
+              placeholder="A video you loved, one you did not, anything you want more or less of."
+            />
+          </div>
+        </div>
+      ),
+      answered: Object.keys(a.style ?? {}).length > 0 || filled(a.style_note),
     },
     {
       title: "How well did we live up to what we say we stand for?",
@@ -591,6 +640,15 @@ function RevealSection({
         ))}
       </ol>
     </div>
+  );
+}
+
+/** Marks the end of a dial that tends to earn more views. */
+function ViewsBadge() {
+  return (
+    <span className="ml-0.5 inline-flex items-center rounded-full border border-accent/40 bg-accent/20 px-1.5 py-0.5 align-middle leading-none">
+      👀
+    </span>
   );
 }
 

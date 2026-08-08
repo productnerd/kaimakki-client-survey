@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { VIRTUE_EXTENT } from "../lib/survey";
 
 const POSITIONS = Array.from({ length: VIRTUE_EXTENT * 2 + 1 }, (_, i) => i - VIRTUE_EXTENT);
@@ -14,9 +15,10 @@ export function VirtueScale({
   value,
   onChange,
 }: {
-  low: string;
+  // Nodes rather than strings: the style dials hang a badge off the end label.
+  low: ReactNode;
   mid: string;
-  high: string;
+  high: ReactNode;
   value: number | undefined;
   onChange: (v: number) => void;
 }) {
@@ -35,7 +37,7 @@ export function VirtueScale({
               key={p}
               type="button"
               onClick={() => onChange(p)}
-              aria-label={`${low} ${p} ${high}`}
+              aria-label={`${mid}: ${p}`}
               aria-pressed={selected}
               className={`h-11 flex-1 rounded-full border transition ${
                 selected

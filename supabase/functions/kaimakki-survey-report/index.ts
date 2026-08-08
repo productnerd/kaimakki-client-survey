@@ -53,6 +53,37 @@ function describeVirtues(virtues: Record<string, number> | undefined): string {
   return parts.join("; ") || "not answered";
 }
 
+/** Creative direction dials: 0 means keep the current mix, the ends are wants. */
+const DIALS: Record<string, [string, string]> = {
+  purpose: ["more educational", "more entertaining"],
+  tone: ["more serious", "more playful and authentic"],
+  formats: ["more original, their own thing", "more proven formats and trends"],
+  promotion: ["more direct selling", "softer, brand building"],
+  faces: ["keep the focus on the work", "show more of their people"],
+  collaborations: ["keep it just them", "more partner collabs"],
+  polish: ["more polished and cinematic", "rawer, phone-shot"],
+  length: ["longer, with more depth", "shorter and punchier"],
+};
+
+
+
+function describeStyle(style: Record<string, number> | undefined): string {
+  if (!style) return "not answered";
+  const parts: string[] = [];
+  for (const [key, pos] of Object.entries(style)) {
+    const pair = DIALS[key];
+    if (!pair) continue;
+    if (pos === 0) {
+      parts.push(`${key}: happy as is`);
+    } else {
+      const side = pos < 0 ? pair[0] : pair[1];
+      const strength = Math.abs(pos) === 3 ? "strongly wants" : Math.abs(pos) === 2 ? "wants" : "leans";
+      parts.push(`${key}: ${strength} ${side} (${pos > 0 ? "+" : ""}${pos})`);
+    }
+  }
+  return parts.join("; ") || "not answered";
+}
+
 function describeValues(values: Record<string, number> | undefined): string {
   if (!values) return "not answered";
   const parts = Object.entries(values).map(([k, n]) => `${VALUES[k] ?? k}: ${n}/10`);
@@ -160,6 +191,8 @@ Deno.serve(async (req: Request) => {
         `The catch they'd warn a friend about: ${a.caveat?.trim() || "skipped"}`,
         `Main benefit: ${a.main_benefit?.trim() || "skipped"}`,
         `How we should improve: ${a.improve?.trim() || "skipped"}`,
+        `Creative direction they want (0 = keep the current mix; the second end of each pair is the one that usually earns more views): ${describeStyle(a.style)}`,
+        `Their note on style: ${a.style_note?.trim() || "none"}`,
         `Company values, rated 1 to 10: ${describeValues(a.values)}`,
         `Their comments on the values: ${describeValueNotes(a.value_notes)}`,
         `Account manager balance (0 = ideal middle, plus or minus 3 = extreme): ${describeVirtues(a.virtues)}`,
@@ -195,6 +228,11 @@ The strengths that are real and repeatable, with evidence. Include the sharpest 
 
 ## What's broken
 The problems, ordered by how much damage they're doing. Be blunt.
+
+## Where the work should go
+What the creative direction dials say about the videos clients actually want next.
+Call out any dial where the roster clearly agrees, and any where two clients pull
+opposite ways, because that is a segmentation question rather than a fix.
 
 ## Where we drift from our values
 The value scores that are weakest, what the free text suggests is behind them, and whether it is one client or a pattern. Say which of the four values is under the most strain.

@@ -3,6 +3,7 @@ import {
   PMF_MAX,
   PMF_MIN,
   PMF_VERY_FROM,
+  STYLE_DIALS,
   VALUE_GROUPS,
   VALUE_MAX,
   VIRTUE_EXTENT,
@@ -106,6 +107,47 @@ export default function Analytics({ links }: { links: AdminLink[] }) {
           />
         </Panel>
       </div>
+
+      <Panel title="Where clients want the videos to go">
+        <p className="mb-5 text-sm text-cream-61">
+          Average pull on each dial. Dead centre means the roster is happy with the current
+          mix; a lean means they want more of that end.
+        </p>
+        <div className="space-y-3">
+          {STYLE_DIALS.map((d) => {
+            const positions = done
+              .map((l) => l.answers?.style?.[d.key])
+              .filter((n): n is number => typeof n === "number");
+            const avg = mean(positions);
+            return (
+              <div key={d.key} className="flex items-center gap-3 text-xs">
+                <span className="w-20 shrink-0 font-display font-bold text-cream-78 sm:w-24">
+                  {d.name}
+                </span>
+                <span className="hidden w-40 shrink-0 truncate text-right text-cream-31 sm:block">
+                  {d.low}
+                </span>
+                <div className="relative h-3 flex-1 rounded-full bg-cream-10">
+                  <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-cream-31" />
+                  {avg !== null && (
+                    <div
+                      className="absolute top-0 h-full rounded-full bg-accent"
+                      style={{
+                        left: avg < 0 ? `${50 - (Math.abs(avg) / VIRTUE_EXTENT) * 50}%` : "50%",
+                        width: `${Math.max((Math.abs(avg) / VIRTUE_EXTENT) * 50, 1.5)}%`,
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="hidden w-40 shrink-0 truncate text-cream-31 sm:block">{d.high}</span>
+                <span className="w-10 shrink-0 text-right font-display font-bold">
+                  {avg === null ? "-" : avg.toFixed(1)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
 
       <Panel title="Living up to our values">
         <p className="mb-5 text-sm text-cream-61">

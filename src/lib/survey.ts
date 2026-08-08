@@ -9,6 +9,9 @@ export type Answers = {
   main_benefit?: string;
   improve?: string;
   nps?: number;
+  /** Creative direction dials: -3 to +3, 0 meaning the current mix is right. */
+  style?: Record<string, number>;
+  style_note?: string;
   values?: Record<string, number>;
   /** Optional free text per value group, keyed by group key. */
   value_notes?: Record<string, string>;
@@ -87,6 +90,91 @@ export const VALUE_ITEMS = VALUE_GROUPS.flatMap((g) =>
 
 export const VALUE_MIN = 1;
 export const VALUE_MAX = 10;
+
+/**
+ * Creative direction dials. Same seven-point shape as the virtues, but the
+ * meaning is different: the centre is "the current mix is right", and both
+ * edges are legitimate preferences rather than failings. The copy has to carry
+ * that difference or clients read the ends as criticism.
+ */
+export const STYLE_DIALS: {
+  key: string;
+  name: string;
+  low: string;
+  mid: string;
+  high: string;
+  example?: string;
+  /** Which end tends to earn more views. Kept on the right for every dial so
+   *  the pattern is scannable rather than something to re-read each row. */
+  views?: "low" | "high";
+}[] = [
+  {
+    key: "purpose",
+    name: "Purpose",
+    low: "More educational",
+    mid: "The split between teaching and entertaining is right",
+    high: "More entertaining",
+    views: "high",
+  },
+  {
+    key: "tone",
+    name: "Tone",
+    low: "More serious",
+    mid: "The balance of light and serious is right",
+    high: "More playful and authentic",
+    views: "high",
+    example: "Applies to every video we make for you, the teaching ones as much as the fun ones.",
+  },
+  {
+    key: "formats",
+    name: "Formats",
+    low: "More original",
+    mid: "The mix of proven formats and original ideas is right",
+    high: "More proven formats",
+    views: "high",
+    example: "Going original is the riskier bet. It can mean fewer views, and it is often worth it anyway.",
+  },
+  {
+    key: "promotion",
+    name: "Promotion",
+    low: "More direct selling",
+    mid: "The balance of selling and brand building is right",
+    high: "Softer, brand building",
+    views: "high",
+  },
+  {
+    key: "faces",
+    name: "Faces",
+    low: "Focus on the work",
+    mid: "How much we show your people is right",
+    high: "More of your people",
+    views: "high",
+  },
+  {
+    key: "collaborations",
+    name: "Collaborations",
+    low: "Just us",
+    mid: "How often we bring in partners is right",
+    high: "More partner collabs",
+    views: "high",
+    example: "A joint video with a supplier, a neighbouring business, or a brand your customers already love.",
+  },
+  {
+    key: "polish",
+    name: "Polish",
+    low: "More polished, cinematic",
+    mid: "The level of polish is right",
+    high: "Rawer, phone-shot",
+    views: "high",
+  },
+  {
+    key: "length",
+    name: "Length",
+    low: "Longer, more depth",
+    mid: "The length of the videos is right",
+    high: "Shorter and punchier",
+  },
+];
 
 /**
  * Aristotle's golden mean: each virtue sits between a deficiency and an excess,
